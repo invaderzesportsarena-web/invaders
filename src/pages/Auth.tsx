@@ -118,7 +118,7 @@ export default function Auth() {
             <Trophy className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-accent bg-clip-text text-transparent">
-            Apex Clash Nexus
+            InvaderZ Esports Arena
           </h1>
           <p className="text-text-secondary mt-2">Join the ultimate esports experience</p>
         </div>

@@ -70,6 +70,8 @@ export function Layout({ children }: LayoutProps) {
     setProfile(data);
   };
 
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'moderator';
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
   };
@@ -102,7 +104,7 @@ export function Layout({ children }: LayoutProps) {
               <Trophy className="w-5 h-5 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-accent bg-clip-text text-transparent">
-              Apex Clash Nexus
+              InvaderZ Esports Arena
             </span>
           </Link>
 
@@ -183,6 +185,14 @@ export function Layout({ children }: LayoutProps) {
                       My Wallet
                     </Link>
                   </DropdownMenuItem>
+                  {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="cursor-pointer">
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-danger">
                     <LogOut className="mr-2 h-4 w-4" />
