@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Users, Trophy, DollarSign, Clock, Eye } from "lucide-react";
+import { Calendar, Trophy, Eye } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -104,11 +104,11 @@ export default function TournamentDetail() {
 
   const getStateColor = (state: string) => {
     switch (state) {
-      case 'registration_open': return 'bg-success text-white';
-      case 'locked': return 'bg-warning text-white';
-      case 'in_progress': return 'bg-primary text-white';
-      case 'completed': return 'bg-secondary text-text-secondary';
-      default: return 'bg-secondary text-text-secondary';
+      case 'registration_open': return 'bg-primary text-primary-foreground';
+      case 'locked': return 'bg-warning text-black';
+      case 'in_progress': return 'bg-gradient-accent text-white';
+      case 'completed': return 'bg-secondary text-secondary-foreground';
+      default: return 'bg-secondary text-secondary-foreground';
     }
   };
 
@@ -170,7 +170,7 @@ export default function TournamentDetail() {
           </div>
         </div>
         {canRegister() && (
-          <Button asChild variant="esports" size="lg">
+          <Button asChild className="bg-primary hover:bg-primary/90" size="lg">
             <Link to={`/tournaments/${tournament.id}/register`}>
               Register Team
             </Link>
@@ -197,8 +197,8 @@ export default function TournamentDetail() {
           </Card>
 
           {/* Results Section */}
-          {tournament.state === 'completed' && results.length > 0 && (
-            <Card className="esports-card">
+          {tournament.state === 'completed' && (
+            <Card className="esports-card" id="results">
               <CardHeader>
                 <CardTitle className="text-text-primary flex items-center gap-2">
                   <Trophy className="w-5 h-5" />
@@ -206,41 +206,45 @@ export default function TournamentDetail() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {results.map((result) => (
-                    <Dialog key={result.id}>
-                      <DialogTrigger asChild>
-                        <div className="relative group cursor-pointer">
-                          <img
-                            src={result.thumb_url || result.image_url}
-                            alt={result.title || 'Tournament Result'}
-                            className="w-full h-32 object-cover rounded-lg transition-transform group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
-                            <Eye className="w-6 h-6 text-white" />
+                {results.length > 0 ? (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {results.map((result) => (
+                      <Dialog key={result.id}>
+                        <DialogTrigger asChild>
+                          <div className="relative group cursor-pointer">
+                            <img
+                              src={result.thumb_url || result.image_url}
+                              alt={result.title || 'Tournament Result'}
+                              className="w-full h-32 object-cover rounded-lg transition-transform group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-lg">
+                              <Eye className="w-6 h-6 text-white" />
+                            </div>
+                            {result.title && (
+                              <p className="text-xs text-text-secondary mt-2 truncate">
+                                {result.title}
+                              </p>
+                            )}
                           </div>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl">
+                          <img
+                            src={result.image_url}
+                            alt={result.title || 'Tournament Result'}
+                            className="w-full h-auto rounded-lg"
+                          />
                           {result.title && (
-                            <p className="text-xs text-text-secondary mt-2 truncate">
+                            <p className="text-text-primary font-semibold mt-2">
                               {result.title}
                             </p>
                           )}
-                        </div>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-4xl">
-                        <img
-                          src={result.image_url}
-                          alt={result.title || 'Tournament Result'}
-                          className="w-full h-auto rounded-lg"
-                        />
-                        {result.title && (
-                          <p className="text-text-primary font-semibold mt-2">
-                            {result.title}
-                          </p>
-                        )}
-                      </DialogContent>
-                    </Dialog>
-                  ))}
-                </div>
+                        </DialogContent>
+                      </Dialog>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-text-secondary">No results available yet.</p>
+                )}
               </CardContent>
             </Card>
           )}

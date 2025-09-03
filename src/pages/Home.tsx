@@ -1,9 +1,22 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { Trophy, Users, Zap, Target, Star, Gamepad2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Home() {
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    setUser(session?.user || null);
+  };
+
   const features = [
     {
       icon: Trophy,
@@ -50,30 +63,44 @@ export default function Home() {
           
           <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
             <span className="bg-gradient-accent bg-clip-text text-transparent">
-              Apex Clash
+              InvaderZ Esports
             </span>
             <br />
-            <span className="text-text-primary">Nexus</span>
+            <span className="text-text-primary">Arena</span>
           </h1>
           
           <p className="text-xl md:text-2xl text-text-secondary mb-8 max-w-2xl mx-auto">
             The ultimate esports platform where legends are born. Compete, win, and claim your place among the elite.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button variant="esports" size="lg" asChild>
-              <Link to="/auth">
-                <Gamepad2 className="mr-2 h-5 w-5" />
-                Start Your Journey
-              </Link>
-            </Button>
-            <Button variant="outline" size="lg" asChild>
-              <Link to="/tournaments">
-                <Trophy className="mr-2 h-5 w-5" />
-                View Tournaments
-              </Link>
-            </Button>
-          </div>
+          {!user ? (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button className="bg-gradient-accent hover:shadow-[var(--shadow-glow)]" size="lg" asChild>
+                <Link to="/auth">
+                  <Gamepad2 className="mr-2 h-5 w-5" />
+                  Start Your Journey
+                </Link>
+              </Button>
+              <Button variant="outline" size="lg" asChild>
+                <Link to="/tournaments">
+                  <Trophy className="mr-2 h-5 w-5" />
+                  View Tournaments
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="text-center">
+              <p className="text-xl text-text-secondary mb-4">
+                Welcome back to InvaderZ Esports Arena
+              </p>
+              <Button variant="outline" size="lg" asChild>
+                <Link to="/tournaments">
+                  <Trophy className="mr-2 h-5 w-5" />
+                  View Tournaments
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -100,7 +127,7 @@ export default function Home() {
             <h2 className="text-4xl md:text-5xl font-bold text-text-primary mb-4">
               Why Choose 
               <span className="bg-gradient-accent bg-clip-text text-transparent ml-3">
-                Apex Clash Nexus?
+                InvaderZ Esports Arena?
               </span>
             </h2>
             <p className="text-xl text-text-secondary max-w-2xl mx-auto">
@@ -143,19 +170,35 @@ export default function Home() {
           <p className="text-xl text-text-secondary mb-8 max-w-2xl mx-auto">
             Join thousands of competitive gamers and start your journey to esports glory today.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button variant="esports" size="lg" asChild>
-              <Link to="/auth">
-                <Star className="mr-2 h-5 w-5" />
-                Get Started Free
-              </Link>
-            </Button>
-            <Button variant="ghost" size="lg" asChild>
-              <Link to="/tournaments">
-                Learn More
-              </Link>
-            </Button>
-          </div>
+          {!user ? (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button className="bg-gradient-accent hover:shadow-[var(--shadow-glow)]" size="lg" asChild>
+                <Link to="/auth">
+                  <Star className="mr-2 h-5 w-5" />
+                  Get Started Free
+                </Link>
+              </Button>
+              <Button variant="ghost" size="lg" asChild>
+                <Link to="/tournaments">
+                  Learn More
+                </Link>
+              </Button>
+            </div>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button variant="outline" size="lg" asChild>
+                <Link to="/tournaments">
+                  <Trophy className="mr-2 h-5 w-5" />
+                  View Tournaments
+                </Link>
+              </Button>
+              <Button variant="ghost" size="lg" asChild>
+                <Link to="/profile">
+                  My Profile
+                </Link>
+              </Button>
+            </div>
+          )}
         </div>
       </section>
     </div>
