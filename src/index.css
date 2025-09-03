@@ -1,96 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Dark-themed esports platform design system */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Dark esports theme colors */
+    --bg-900: 201 52% 6%;           /* #0B0F14 */
+    --bg-800: 206 46% 9%;           /* #0F1621 */
+    --bg-700: 208 39% 14%;          /* #152233 */
+    
+    --stroke: 211 32% 21%;          /* #233246 */
+    --divider: 209 35% 17%;         /* #1C2A3A */
+    
+    --esports-primary: 180 100% 39%; /* #00C8C8 */
+    --esports-primary-hover: 180 100% 32%; /* #00A5A5 */
+    --esports-primary-active: 180 100% 24%; /* #007C7C */
+    
+    --accent-purple: 262 100% 65%;   /* #6C49FF */
+    --accent-pink: 290 100% 69%;     /* #C21EFF */
+    
+    --neon-green: 104 100% 54%;      /* #39FF14 */
+    
+    --text-primary: 218 39% 91%;     /* #E6EEF7 */
+    --text-secondary: 215 29% 73%;   /* #A7B7CD */
+    --text-muted: 215 20% 62%;       /* #7E93AD */
+    
+    --success: 161 100% 41%;         /* #00D28F */
+    --warning: 38 100% 56%;          /* #FFB020 */
+    --danger: 356 95% 64%;           /* #FF4757 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Design system tokens */
+    --background: var(--bg-900);
+    --foreground: var(--text-primary);
+    
+    --card: var(--bg-800);
+    --card-foreground: var(--text-primary);
+    
+    --popover: var(--bg-800);
+    --popover-foreground: var(--text-primary);
+    
+    --primary: var(--esports-primary);
+    --primary-foreground: var(--bg-900);
+    
+    --secondary: var(--bg-700);
+    --secondary-foreground: var(--text-primary);
+    
+    --muted: var(--bg-700);
+    --muted-foreground: var(--text-muted);
+    
+    --accent: var(--accent-purple);
+    --accent-foreground: var(--text-primary);
+    
+    --destructive: var(--danger);
+    --destructive-foreground: var(--text-primary);
+    
+    --border: var(--stroke);
+    --input: var(--bg-700);
+    --ring: var(--esports-primary);
+    
+    --radius: 1rem;
+    
+    /* Gradients */
+    --gradient-accent: linear-gradient(135deg, hsl(var(--accent-purple)), hsl(var(--accent-pink)));
+    --gradient-primary: linear-gradient(135deg, hsl(var(--esports-primary)), hsl(var(--esports-primary-hover)));
+    
+    /* Shadows */
+    --shadow-card: 0 8px 20px rgba(0, 0, 0, 0.35);
+    --shadow-glow: 0 0 32px rgba(194, 30, 255, 0.25);
+    --shadow-primary-glow: 0 0 20px rgba(0, 200, 200, 0.3);
+    
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -100,6 +84,46 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-inter antialiased;
+    background: hsl(var(--bg-900));
+    color: hsl(var(--text-primary));
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Esports card component */
+  .esports-card {
+    @apply bg-card border border-border rounded-2xl;
+    box-shadow: var(--shadow-card);
+    transition: var(--transition-smooth);
+  }
+  
+  .esports-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card), var(--shadow-glow);
+  }
+  
+  /* Gradient backgrounds */
+  .bg-gradient-accent {
+    background: var(--gradient-accent);
+  }
+  
+  .bg-gradient-primary {
+    background: var(--gradient-primary);
+  }
+  
+  /* Text glow effect */
+  .text-glow {
+    text-shadow: 0 0 10px currentColor;
+  }
+  
+  /* Neon border effect */
+  .border-neon {
+    border-color: hsl(var(--neon-green));
+    box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
   }
 }
