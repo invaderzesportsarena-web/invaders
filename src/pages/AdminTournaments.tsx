@@ -21,8 +21,10 @@ interface Tournament {
   game: string | null;
   state: string;
   starts_at: string | null;
+  reg_starts_at: string | null;
   reg_closes_at: string | null;
   entry_fee_credits: number;
+  slots: number | null;
   created_at: string;
   rules_md: string | null;
   format: string;
@@ -33,8 +35,10 @@ interface TournamentFormData {
   game: string;
   rules_md: string;
   starts_at: string;
+  reg_starts_at: string;
   reg_closes_at: string;
   entry_fee_credits: number;
+  slots: number;
   state: "draft" | "registration_open" | "locked" | "in_progress" | "completed";
 }
 
@@ -43,8 +47,10 @@ const initialFormData: TournamentFormData = {
   game: "",
   rules_md: "",
   starts_at: "",
+  reg_starts_at: "",
   reg_closes_at: "",
   entry_fee_credits: 0,
+  slots: 0,
   state: "registration_open"
 };
 
@@ -102,7 +108,9 @@ export default function AdminTournaments() {
       const payload = {
         ...formData,
         entry_fee_credits: parseInt(formData.entry_fee_credits.toString()) || 0,
+        slots: parseInt(formData.slots.toString()) || null,
         starts_at: formData.starts_at || null,
+        reg_starts_at: formData.reg_starts_at || null,
         reg_closes_at: formData.reg_closes_at || null,
         state: formData.state as "draft" | "registration_open" | "locked" | "in_progress" | "completed"
       };
@@ -152,8 +160,10 @@ export default function AdminTournaments() {
       game: tournament.game || "",
       rules_md: tournament.rules_md || "",
       starts_at: tournament.starts_at ? format(new Date(tournament.starts_at), "yyyy-MM-dd'T'HH:mm") : "",
+      reg_starts_at: tournament.reg_starts_at ? format(new Date(tournament.reg_starts_at), "yyyy-MM-dd'T'HH:mm") : "",
       reg_closes_at: tournament.reg_closes_at ? format(new Date(tournament.reg_closes_at), "yyyy-MM-dd'T'HH:mm") : "",
       entry_fee_credits: tournament.entry_fee_credits,
+      slots: tournament.slots || 0,
       state: tournament.state as "draft" | "registration_open" | "locked" | "in_progress" | "completed"
     });
     setEditingId(tournament.id);
@@ -288,12 +298,12 @@ export default function AdminTournaments() {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="starts_at">Starts At</Label>
+                    <Label htmlFor="reg_starts_at">Registration Starts At</Label>
                     <Input
-                      id="starts_at"
+                      id="reg_starts_at"
                       type="datetime-local"
-                      value={formData.starts_at}
-                      onChange={(e) => setFormData({ ...formData, starts_at: e.target.value })}
+                      value={formData.reg_starts_at}
+                      onChange={(e) => setFormData({ ...formData, reg_starts_at: e.target.value })}
                     />
                   </div>
                   <div>
@@ -303,6 +313,29 @@ export default function AdminTournaments() {
                       type="datetime-local"
                       value={formData.reg_closes_at}
                       onChange={(e) => setFormData({ ...formData, reg_closes_at: e.target.value })}
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="starts_at">Tournament Starts At</Label>
+                    <Input
+                      id="starts_at"
+                      type="datetime-local"
+                      value={formData.starts_at}
+                      onChange={(e) => setFormData({ ...formData, starts_at: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="slots">Total Slots</Label>
+                    <Input
+                      id="slots"
+                      type="number"
+                      min="0"
+                      value={formData.slots}
+                      onChange={(e) => setFormData({ ...formData, slots: parseInt(e.target.value) || 0 })}
+                      placeholder="Maximum participants"
                     />
                   </div>
                 </div>
@@ -371,8 +404,10 @@ export default function AdminTournaments() {
                       <TableHead>Title</TableHead>
                       <TableHead>Game</TableHead>
                       <TableHead>State</TableHead>
-                      <TableHead>Starts At</TableHead>
+                      <TableHead>Slots</TableHead>
+                      <TableHead>Reg Starts</TableHead>
                       <TableHead>Reg Closes</TableHead>
+                      <TableHead>Starts At</TableHead>
                       <TableHead>Entry Fee</TableHead>
                       <TableHead>Created</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -388,11 +423,15 @@ export default function AdminTournaments() {
                             {stateLabels[tournament.state as keyof typeof stateLabels]}
                           </Badge>
                         </TableCell>
+                        <TableCell>{tournament.slots || "-"}</TableCell>
                         <TableCell>
-                          {tournament.starts_at ? format(new Date(tournament.starts_at), "MMM dd, HH:mm") : "-"}
+                          {tournament.reg_starts_at ? format(new Date(tournament.reg_starts_at), "MMM dd, HH:mm") : "-"}
                         </TableCell>
                         <TableCell>
                           {tournament.reg_closes_at ? format(new Date(tournament.reg_closes_at), "MMM dd, HH:mm") : "-"}
+                        </TableCell>
+                        <TableCell>
+                          {tournament.starts_at ? format(new Date(tournament.starts_at), "MMM dd, HH:mm") : "-"}
                         </TableCell>
                         <TableCell>{tournament.entry_fee_credits} ZC</TableCell>
                         <TableCell>{format(new Date(tournament.created_at), "MMM dd, HH:mm")}</TableCell>

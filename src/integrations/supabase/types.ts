@@ -413,7 +413,9 @@ export type Database = {
           game: string | null
           id: string
           reg_closes_at: string | null
+          reg_starts_at: string | null
           rules_md: string | null
+          slots: number | null
           starts_at: string | null
           state: Database["public"]["Enums"]["t_state"]
           title: string
@@ -425,7 +427,9 @@ export type Database = {
           game?: string | null
           id?: string
           reg_closes_at?: string | null
+          reg_starts_at?: string | null
           rules_md?: string | null
+          slots?: number | null
           starts_at?: string | null
           state?: Database["public"]["Enums"]["t_state"]
           title: string
@@ -437,7 +441,9 @@ export type Database = {
           game?: string | null
           id?: string
           reg_closes_at?: string | null
+          reg_starts_at?: string | null
           rules_md?: string | null
+          slots?: number | null
           starts_at?: string | null
           state?: Database["public"]["Enums"]["t_state"]
           title?: string
