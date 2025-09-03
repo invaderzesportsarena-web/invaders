@@ -118,6 +118,41 @@ export default function AdminRegistrations() {
     }
   };
 
+  const handleBulkApprove = async () => {
+    if (selectedTournament === "all") return;
+    
+    try {
+      const { error } = await supabase
+        .from('registrations')
+        .update({ status: 'approved' })
+        .eq('tournament_id', selectedTournament)
+        .eq('status', 'pending');
+
+      if (error) throw error;
+
+      // Update local state
+      setRegistrations(prev => 
+        prev.map(reg => 
+          reg.tournaments?.id === selectedTournament && reg.status === 'pending'
+            ? { ...reg, status: 'approved' }
+            : reg
+        )
+      );
+
+      toast({
+        title: "Success",
+        description: "All pending registrations approved",
+      });
+    } catch (error: any) {
+      console.error('Error bulk approving registrations:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to bulk approve registrations",
+        variant: "destructive"
+      });
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-warning text-warning-foreground';
@@ -175,8 +210,8 @@ export default function AdminRegistrations() {
           </p>
         </div>
 
-        {/* Filters */}
-        <div className="flex gap-4 mb-6">
+        {/* Filters and Bulk Actions */}
+        <div className="flex gap-4 mb-6 flex-wrap">
           <Select value={selectedTournament} onValueChange={setSelectedTournament}>
             <SelectTrigger className="w-64">
               <SelectValue placeholder="Filter by tournament" />
@@ -203,6 +238,30 @@ export default function AdminRegistrations() {
               <SelectItem value="withdrawn">Withdrawn</SelectItem>
             </SelectContent>
           </Select>
+
+          {selectedTournament !== "all" && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button className="bg-primary hover:bg-primary/90">
+                  Approve All Pending
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Bulk Approve Registrations</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to approve all pending registrations for this tournament?
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleBulkApprove}>
+                    Approve All
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
         </div>
 
         <Card className="esports-card">
