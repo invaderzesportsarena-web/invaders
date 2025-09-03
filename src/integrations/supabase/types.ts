@@ -80,6 +80,13 @@ export type Database = {
             foreignKeyName: "orders_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -126,6 +133,13 @@ export type Database = {
           type?: Database["public"]["Enums"]["post_type"]
         }
         Relationships: [
+          {
+            foreignKeyName: "posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "posts_author_id_fkey"
             columns: ["author_id"]
@@ -237,6 +251,13 @@ export type Database = {
             foreignKeyName: "registrations_captain_id_fkey"
             columns: ["captain_id"]
             isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_captain_id_fkey"
+            columns: ["captain_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -286,6 +307,13 @@ export type Database = {
             columns: ["tournament_id"]
             isOneToOne: false
             referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "results_media_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
             referencedColumns: ["id"]
           },
           {
@@ -361,6 +389,13 @@ export type Database = {
           tag?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "teams_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "teams_owner_id_fkey"
             columns: ["owner_id"]
@@ -492,6 +527,13 @@ export type Database = {
             foreignKeyName: "zcred_deposit_forms_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zcred_deposit_forms_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -526,6 +568,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "zcred_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "zcred_transactions_user_id_fkey"
             columns: ["user_id"]
@@ -577,6 +626,13 @@ export type Database = {
             foreignKeyName: "zcred_withdrawal_forms_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zcred_withdrawal_forms_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -584,12 +640,30 @@ export type Database = {
       }
     }
     Views: {
+      admin_users: {
+        Row: {
+          created_at: string | null
+          display_name: string | null
+          email: string | null
+          id: string | null
+          role: Database["public"]["Enums"]["role_enum"] | null
+          username: string | null
+        }
+        Relationships: []
+      }
       zcred_balances: {
         Row: {
           balance: number | null
           user_id: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "zcred_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "zcred_transactions_user_id_fkey"
             columns: ["user_id"]
@@ -608,6 +682,10 @@ export type Database = {
       make_user_admin: {
         Args: { target_user_id: string }
         Returns: undefined
+      }
+      setup_admin_account: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
     }
     Enums: {
