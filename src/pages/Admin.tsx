@@ -9,7 +9,8 @@ import {
   Package, 
   Trophy,
   BarChart3,
-  Settings
+  Settings,
+  Medal
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -94,6 +95,13 @@ export default function Admin() {
       color: "bg-primary/10 text-primary"
     },
     {
+      title: "Tournaments Management",
+      description: "Create and manage tournaments",
+      icon: Trophy,
+      href: "/admin/tournaments",
+      color: "bg-cyan-500/10 text-cyan-400"
+    },
+    {
       title: "Wallet Operations",
       description: "Handle deposits, withdrawals, and transactions",
       icon: Wallet,
@@ -117,7 +125,7 @@ export default function Admin() {
     {
       title: "Results Uploader",
       description: "Upload tournament results and media",
-      icon: Trophy,
+      icon: Medal,
       href: "/admin/results",
       color: "bg-gradient-accent text-white"
     },

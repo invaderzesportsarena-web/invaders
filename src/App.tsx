@@ -24,6 +24,7 @@ import AdminPosts from "./pages/AdminPosts";
 import AdminProducts from "./pages/AdminProducts";
 import AdminResults from "./pages/AdminResults";
 import AdminSettings from "./pages/AdminSettings";
+import AdminTournaments from "./pages/AdminTournaments";
 
 const queryClient = new QueryClient();
 
@@ -50,13 +51,14 @@ const App = () => (
             <Route path="/wallet/withdraw" element={<WalletWithdraw />} />
             
             {/* Admin Routes - Protected */}
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/admin/registrations" element={<AdminRegistrations />} />
-            <Route path="/admin/wallet" element={<AdminWallet />} />
-            <Route path="/admin/posts" element={<AdminPosts />} />
-            <Route path="/admin/products" element={<AdminProducts />} />
-            <Route path="/admin/results" element={<AdminResults />} />
-            <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/registrations" element={<AdminRegistrations />} />
+          <Route path="/admin/tournaments" element={<AdminTournaments />} />
+          <Route path="/admin/wallet" element={<AdminWallet />} />
+          <Route path="/admin/posts" element={<AdminPosts />} />
+          <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin/results" element={<AdminResults />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
             
             {/* 404 fallback */}
             <Route path="*" element={<NotFound />} />

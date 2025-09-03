@@ -275,8 +275,6 @@ export default function AdminProducts() {
             
             if (stockError) throw stockError;
           }
-
-          if (stockError) throw stockError;
         }
       }
 
