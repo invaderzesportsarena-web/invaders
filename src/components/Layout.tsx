@@ -81,7 +81,6 @@ export function Layout({ children }: LayoutProps) {
   const navItems = [
     { href: "/", label: "Home", icon: Home },
     { href: "/tournaments", label: "Tournaments", icon: Trophy },
-    { href: "/results", label: "Results", icon: Image },
     { href: "/news", label: "News", icon: Newspaper },
     { href: "/guides", label: "Guides", icon: BookOpen },
     { href: "/shop", label: "Shop", icon: ShoppingBag },
