@@ -17,6 +17,13 @@ import Wallet from "./pages/Wallet";
 import WalletDeposit from "./pages/WalletDeposit";
 import WalletWithdraw from "./pages/WalletWithdraw";
 import NotFound from "./pages/NotFound";
+import Admin from "./pages/Admin";
+import AdminRegistrations from "./pages/AdminRegistrations";
+import AdminWallet from "./pages/AdminWallet";
+import AdminPosts from "./pages/AdminPosts";
+import AdminProducts from "./pages/AdminProducts";
+import AdminResults from "./pages/AdminResults";
+import AdminSettings from "./pages/AdminSettings";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +37,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/signup" element={<Auth />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/tournaments" element={<Tournaments />} />
             <Route path="/tournaments/:id" element={<TournamentDetail />} />
@@ -40,7 +48,17 @@ const App = () => (
             <Route path="/wallet" element={<Wallet />} />
             <Route path="/wallet/deposit" element={<WalletDeposit />} />
             <Route path="/wallet/withdraw" element={<WalletWithdraw />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            
+            {/* Admin Routes - Protected */}
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/registrations" element={<AdminRegistrations />} />
+            <Route path="/admin/wallet" element={<AdminWallet />} />
+            <Route path="/admin/posts" element={<AdminPosts />} />
+            <Route path="/admin/products" element={<AdminProducts />} />
+            <Route path="/admin/results" element={<AdminResults />} />
+            <Route path="/admin/settings" element={<AdminSettings />} />
+            
+            {/* 404 fallback */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>
