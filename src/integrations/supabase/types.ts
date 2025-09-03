@@ -605,6 +605,10 @@ export type Database = {
         Args: { uid: string }
         Returns: boolean
       }
+      make_user_admin: {
+        Args: { target_user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       deposit_status: "submitted" | "verified" | "rejected"
