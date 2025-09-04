@@ -19,6 +19,9 @@ export default {
 		},
 		extend: {
 			fontFamily: {
+				sans: ['Rajdhani', 'sans-serif'],
+				heading: ['Orbitron', 'sans-serif'],
+				display: ['Orbitron', 'sans-serif'],
 				inter: ['Inter', 'sans-serif'],
 			},
 			colors: {

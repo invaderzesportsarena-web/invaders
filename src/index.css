@@ -8,24 +8,24 @@
 
 @layer base {
   :root {
-    /* Exact theme colors as specified */
-    --bg-900: 209 58% 7%;            /* #0B0F14 */
-    --bg-800: 209 46% 10%;           /* #0F1621 */
-    --bg-700: 208 39% 14%;           /* #152233 */
+    /* InvaderZ Brand Colors */
+    --bg-900: 240 10% 4%;            /* Very dark background */
+    --bg-800: 240 10% 8%;            /* Dark background */
+    --bg-700: 240 4% 16%;            /* Card backgrounds */
     
-    --stroke: 211 32% 21%;           /* #233246 */
-    --divider: 209 35% 17%;          /* #1C2A3A */
+    --stroke: 240 5% 20%;            /* Border color */
+    --divider: 240 5% 15%;           /* Divider lines */
     
-    --esports-primary: 180 100% 39%; /* #00C8C8 */
-    --esports-primary-hover: 180 100% 32%; /* #00A5A5 */
-    --esports-primary-active: 180 100% 24%; /* #007C7C */
+    --esports-primary: 266 88% 62%;  /* #a64cf4 - InvaderZ Purple */
+    --esports-primary-hover: 266 88% 52%;
+    --esports-primary-active: 266 88% 42%;
     
-    --accent-purple: 262 100% 65%;   /* #6C49FF */
-    --accent-pink: 290 100% 69%;     /* #C21EFF */
+    --accent-purple: 266 88% 62%;    /* #a64cf4 */
+    --accent-pink: 290 100% 69%;     /* Complementary pink */
     
-    --text-primary: 218 39% 91%;     /* #E6EEF7 */
-    --text-secondary: 215 29% 73%;   /* #A7B7CD */
-    --text-muted: 215 20% 62%;       /* #7E93AD */
+    --text-primary: 0 0% 98%;        /* Almost white */
+    --text-secondary: 240 5% 64%;    /* Gray text */
+    --text-muted: 240 5% 44%;        /* Muted gray */
     
     --success: 161 100% 41%;         /* #00D28F */
     --warning: 38 100% 56%;          /* #FFB020 */
@@ -82,9 +82,10 @@
   }
 
   body {
-    @apply bg-background text-foreground font-inter antialiased;
+    @apply bg-background text-foreground antialiased;
     background: hsl(var(--bg-900));
     color: hsl(var(--text-primary));
+    font-family: 'Rajdhani', sans-serif;
   }
   
   html {
