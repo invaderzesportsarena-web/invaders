@@ -29,6 +29,7 @@ interface Tournament {
   created_at: string;
   rules_md: string | null;
   format: string;
+  cover_url: string | null;
 }
 
 interface TournamentFormData {
@@ -41,6 +42,7 @@ interface TournamentFormData {
   entry_fee_credits: number;
   slots: number;
   state: "draft" | "registration_open" | "locked" | "in_progress" | "completed";
+  cover_url: string;
 }
 
 const initialFormData: TournamentFormData = {
@@ -52,7 +54,8 @@ const initialFormData: TournamentFormData = {
   reg_closes_at: "",
   entry_fee_credits: 0,
   slots: 0,
-  state: "registration_open"
+  state: "registration_open",
+  cover_url: ""
 };
 
 const stateColors = {
@@ -76,6 +79,8 @@ export default function AdminTournaments() {
   const [formData, setFormData] = useState<TournamentFormData>(initialFormData);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -105,10 +110,32 @@ export default function AdminTournaments() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setUploading(true);
     
     try {
+      let cover_url = formData.cover_url;
+
+      // Upload cover image if a new file is selected
+      if (coverFile) {
+        const fileExt = coverFile.name.split('.').pop();
+        const fileName = `${crypto.randomUUID()}.${fileExt}`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('covers')
+          .upload(fileName, coverFile);
+
+        if (uploadError) throw uploadError;
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('covers')
+          .getPublicUrl(fileName);
+        
+        cover_url = publicUrl;
+      }
+      
       const payload = {
         ...formData,
+        cover_url,
         entry_fee_credits: parseInt(formData.entry_fee_credits.toString()) || 0,
         slots: parseInt(formData.slots.toString()) || null,
         starts_at: formData.starts_at || null,
@@ -144,6 +171,7 @@ export default function AdminTournaments() {
 
       setDialogOpen(false);
       setFormData(initialFormData);
+      setCoverFile(null);
       setEditingId(null);
       fetchTournaments();
     } catch (error: any) {
@@ -153,6 +181,8 @@ export default function AdminTournaments() {
         description: error.message || "Failed to save tournament",
         variant: "destructive"
       });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -166,7 +196,8 @@ export default function AdminTournaments() {
       reg_closes_at: tournament.reg_closes_at ? format(new Date(tournament.reg_closes_at), "yyyy-MM-dd'T'HH:mm") : "",
       entry_fee_credits: tournament.entry_fee_credits,
       slots: tournament.slots || 0,
-      state: tournament.state as "draft" | "registration_open" | "locked" | "in_progress" | "completed"
+      state: tournament.state as "draft" | "registration_open" | "locked" | "in_progress" | "completed",
+      cover_url: tournament.cover_url || ""
     });
     setEditingId(tournament.id);
     setDialogOpen(true);
@@ -224,6 +255,7 @@ export default function AdminTournaments() {
 
   const openCreateDialog = () => {
     setFormData(initialFormData);
+    setCoverFile(null);
     setEditingId(null);
     setDialogOpen(true);
   };
@@ -377,12 +409,33 @@ export default function AdminTournaments() {
                   </div>
                 </div>
                 
+                {/* Cover Image Upload */}
+                <div>
+                  <Label htmlFor="cover">Cover Image</Label>
+                  <Input
+                    id="cover"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setCoverFile(e.target.files?.[0] || null)}
+                  />
+                  {formData.cover_url && (
+                    <div className="mt-2">
+                      <img 
+                        src={formData.cover_url} 
+                        alt="Current cover" 
+                        className="w-32 h-20 object-cover rounded border"
+                      />
+                      <p className="text-sm text-muted-foreground mt-1">Current cover image</p>
+                    </div>
+                  )}
+                </div>
+                
                 <div className="flex justify-end space-x-2 pt-4">
                   <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit" className="bg-primary hover:bg-primary/90">
-                    {editingId ? "Update" : "Create"}
+                  <Button type="submit" disabled={uploading} className="bg-primary hover:bg-primary/90">
+                    {uploading ? "Uploading..." : editingId ? "Update" : "Create"}
                   </Button>
                 </div>
               </form>

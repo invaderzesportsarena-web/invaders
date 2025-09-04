@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_account_details: {
+        Row: {
+          account_number: string
+          account_title: string
+          bank_name: string
+          id: number
+          instructions: string | null
+          is_active: boolean
+          updated_at: string
+        }
+        Insert: {
+          account_number: string
+          account_title: string
+          bank_name: string
+          id?: number
+          instructions?: string | null
+          is_active?: boolean
+          updated_at?: string
+        }
+        Update: {
+          account_number?: string
+          account_title?: string
+          bank_name?: string
+          id?: number
+          instructions?: string | null
+          is_active?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           id: string
@@ -80,13 +110,6 @@ export type Database = {
             foreignKeyName: "orders_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "admin_users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "orders_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -133,13 +156,6 @@ export type Database = {
           type?: Database["public"]["Enums"]["post_type"]
         }
         Relationships: [
-          {
-            foreignKeyName: "posts_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "admin_users"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "posts_author_id_fkey"
             columns: ["author_id"]
@@ -213,7 +229,15 @@ export type Database = {
           username?: string | null
           whatsapp_number?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "me"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       registrations: {
         Row: {
@@ -247,13 +271,6 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "registrations_captain_id_fkey"
-            columns: ["captain_id"]
-            isOneToOne: false
-            referencedRelation: "admin_users"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "registrations_captain_id_fkey"
             columns: ["captain_id"]
@@ -307,13 +324,6 @@ export type Database = {
             columns: ["tournament_id"]
             isOneToOne: false
             referencedRelation: "tournaments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "results_media_uploaded_by_fkey"
-            columns: ["uploaded_by"]
-            isOneToOne: false
-            referencedRelation: "admin_users"
             referencedColumns: ["id"]
           },
           {
@@ -393,20 +403,46 @@ export type Database = {
             foreignKeyName: "teams_owner_id_fkey"
             columns: ["owner_id"]
             isOneToOne: false
-            referencedRelation: "admin_users"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      tournament_prizes: {
+        Row: {
+          amount_zcred: number
+          id: number
+          note: string | null
+          rank: number
+          tournament_id: string
+        }
+        Insert: {
+          amount_zcred: number
+          id?: number
+          note?: string | null
+          rank: number
+          tournament_id: string
+        }
+        Update: {
+          amount_zcred?: number
+          id?: number
+          note?: string | null
+          rank?: number
+          tournament_id?: string
+        }
+        Relationships: [
           {
-            foreignKeyName: "teams_owner_id_fkey"
-            columns: ["owner_id"]
+            foreignKeyName: "tournament_prizes_tournament_id_fkey"
+            columns: ["tournament_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "tournaments"
             referencedColumns: ["id"]
           },
         ]
       }
       tournaments: {
         Row: {
+          cover_url: string | null
           created_at: string
           entry_fee_credits: number
           format: Database["public"]["Enums"]["t_format"]
@@ -421,6 +457,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          cover_url?: string | null
           created_at?: string
           entry_fee_credits?: number
           format?: Database["public"]["Enums"]["t_format"]
@@ -435,6 +472,7 @@ export type Database = {
           title: string
         }
         Update: {
+          cover_url?: string | null
           created_at?: string
           entry_fee_credits?: number
           format?: Database["public"]["Enums"]["t_format"]
@@ -533,13 +571,6 @@ export type Database = {
             foreignKeyName: "zcred_deposit_forms_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "admin_users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "zcred_deposit_forms_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -578,14 +609,33 @@ export type Database = {
             foreignKeyName: "zcred_transactions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "admin_users"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+        ]
+      }
+      zcred_wallets: {
+        Row: {
+          balance: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
           {
-            foreignKeyName: "zcred_transactions_user_id_fkey"
+            foreignKeyName: "zcred_wallets_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
+            isOneToOne: true
+            referencedRelation: "me"
             referencedColumns: ["id"]
           },
         ]
@@ -632,13 +682,6 @@ export type Database = {
             foreignKeyName: "zcred_withdrawal_forms_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "admin_users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "zcred_withdrawal_forms_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -646,14 +689,21 @@ export type Database = {
       }
     }
     Views: {
-      admin_users: {
+      me: {
         Row: {
           created_at: string | null
-          display_name: string | null
           email: string | null
           id: string | null
-          role: Database["public"]["Enums"]["role_enum"] | null
-          username: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
         }
         Relationships: []
       }
@@ -667,13 +717,6 @@ export type Database = {
             foreignKeyName: "zcred_transactions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
-            referencedRelation: "admin_users"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "zcred_transactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -681,6 +724,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_adjust_wallet: {
+        Args: { p_delta: number; p_reason?: string; p_user_id: string }
+        Returns: undefined
+      }
       is_admin: {
         Args: { uid: string }
         Returns: boolean
@@ -689,12 +736,29 @@ export type Database = {
         Args: { target_user_id: string }
         Returns: undefined
       }
+      register_for_tournament: {
+        Args: {
+          p_entry_fee: number
+          p_team_name: string
+          p_tournament_id: string
+        }
+        Returns: undefined
+      }
       setup_admin_account: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
       update_user_role: {
         Args: { new_role: string; target_user_id: string }
+        Returns: undefined
+      }
+      upsert_prize: {
+        Args: {
+          p_amount: number
+          p_note?: string
+          p_rank: number
+          p_tournament_id: string
+        }
         Returns: undefined
       }
     }

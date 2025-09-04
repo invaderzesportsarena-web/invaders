@@ -17,6 +17,7 @@ interface Tournament {
   starts_at: string;
   reg_closes_at?: string;
   entry_fee_credits: number;
+  cover_url?: string;
 }
 
 interface Registration {
@@ -252,10 +253,25 @@ export default function Tournaments() {
     registration?: Registration | null 
   }) => (
     <Card 
-      className="esports-card group cursor-pointer" 
+      className="esports-card group cursor-pointer overflow-hidden" 
       onClick={() => navigate(`/tournaments/${tournament.id}`)}
     >
-      <CardHeader>
+      {/* Cover Image */}
+      {tournament.cover_url && (
+        <div className="relative h-48 w-full overflow-hidden">
+          <img
+            src={tournament.cover_url}
+            alt={tournament.title}
+            className="w-full h-full object-cover transition-transform group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+          <Badge className={`absolute top-3 right-3 ${getStateColor(tournament.state)}`}>
+            {getStateLabel(tournament.state)}
+          </Badge>
+        </div>
+      )}
+      
+      <CardHeader className={tournament.cover_url ? "pb-2" : ""}>
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="text-xl text-text-primary group-hover:text-primary transition-colors">
@@ -265,9 +281,11 @@ export default function Tournaments() {
               {tournament.game}
             </CardDescription>
           </div>
-          <Badge className={getStateColor(tournament.state)}>
-            {getStateLabel(tournament.state)}
-          </Badge>
+          {!tournament.cover_url && (
+            <Badge className={getStateColor(tournament.state)}>
+              {getStateLabel(tournament.state)}
+            </Badge>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
