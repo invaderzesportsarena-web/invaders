@@ -9,11 +9,13 @@ import { ArrowLeft, Minus, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { validateZcredInput, parseZcreds, formatZcreds, formatZcredDisplay, formatPkrFromZcreds } from "@/utils/formatZcreds";
+import { getLatestConversionRate, convertZcToPkr, MIN_WITHDRAWAL_ZC } from "@/utils/conversionRate";
 import { SUPABASE_CONFIG, VALIDATION } from "@/config/supabase";
 
 export default function WalletWithdraw() {
   const [user, setUser] = useState<any>(null);
   const [balance, setBalance] = useState<number>(0);
+  const [conversionRate, setConversionRate] = useState<number>(90);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
@@ -30,7 +32,13 @@ export default function WalletWithdraw() {
 
   useEffect(() => {
     checkAuth();
+    loadConversionRate();
   }, []);
+
+  const loadConversionRate = async () => {
+    const rate = await getLatestConversionRate();
+    setConversionRate(rate);
+  };
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -105,10 +113,10 @@ export default function WalletWithdraw() {
     }
 
     // Minimum withdrawal check
-    if (withdrawAmount < 2) {
+    if (withdrawAmount < MIN_WITHDRAWAL_ZC) {
       toast({
         title: "Minimum Withdrawal",
-        description: "Minimum withdrawal amount is 2.00 Z-Credits",
+        description: `Minimum withdrawal amount is ${MIN_WITHDRAWAL_ZC} Z-Credits`,
         variant: "destructive"
       });
       return;
@@ -190,7 +198,10 @@ export default function WalletWithdraw() {
               </div>
               <div className="text-right">
                 <p className="text-text-secondary text-sm">Exchange Rate</p>
-                <p className="text-text-primary font-semibold">1 ZC = {VALIDATION.EXCHANGE_RATE} PKR</p>
+                <p className="text-text-primary font-semibold">1 ZC = {conversionRate} PKR</p>
+                <p className="text-xs text-text-muted">
+                  Your balance: ≈ PKR {convertZcToPkr(balance, conversionRate).toFixed(2)}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -217,17 +228,22 @@ export default function WalletWithdraw() {
                   id="amount_zcreds"
                   type="number"
                   step="0.01"
-                  min="2"
+                  min={MIN_WITHDRAWAL_ZC}
                   inputMode="decimal"
                   value={formData.amount_zcreds}
                   onChange={(e) => handleInputChange('amount_zcreds', e.target.value)}
-                  placeholder="2.00"
+                  placeholder={`${MIN_WITHDRAWAL_ZC}.00`}
                   className="rounded-2xl"
                   required
                 />
                 <p className="text-xs text-text-muted">
-                  Minimum: 2.00 ZC • Maximum: {formatZcreds(balance)} ZC
+                  Minimum: {MIN_WITHDRAWAL_ZC} ZC • Maximum: {formatZcreds(balance)} ZC
                 </p>
+                {formData.amount_zcreds && (
+                  <p className="text-sm text-text-secondary">
+                    ≈ PKR {convertZcToPkr(parseFloat(formData.amount_zcreds) || 0, conversionRate).toFixed(2)}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -310,7 +326,7 @@ export default function WalletWithdraw() {
                       <li>• Withdrawal requests are processed within 24-48 hours</li>
                       <li>• Ensure all bank details are correct and match your ID</li>
                       <li>• Processing may take longer during weekends/holidays</li>
-                      <li>• Minimum withdrawal amount is 2.00 Z-Credits</li>
+                      <li>• Minimum withdrawal amount is {MIN_WITHDRAWAL_ZC} Z-Credits</li>
                     </ul>
                   </div>
                 </div>
@@ -328,7 +344,7 @@ export default function WalletWithdraw() {
                 <Button
                   type="submit"
                   variant="esports"
-                  disabled={submitting || balance < 2}
+                  disabled={submitting || balance < MIN_WITHDRAWAL_ZC}
                   className="flex-1"
                 >
                   {submitting ? "Submitting..." : "Submit Withdrawal Request"}

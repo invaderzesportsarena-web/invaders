@@ -9,6 +9,7 @@ import { ArrowLeft, Upload, DollarSign } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { validateZcredInput, parseZcreds } from "@/utils/formatZcreds";
+import { getLatestConversionRate, convertPkrToZc, MIN_DEPOSIT_PKR } from "@/utils/conversionRate";
 import { StorageManager } from "@/utils/storageUtils";
 import { SUPABASE_CONFIG } from "@/config/supabase";
 export default function WalletDeposit() {
@@ -16,10 +17,9 @@ export default function WalletDeposit() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [conversionRate, setConversionRate] = useState<number>(90);
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     amount_money: '',
     bank_sender_name: '',
@@ -31,7 +31,13 @@ export default function WalletDeposit() {
   });
   useEffect(() => {
     checkAuth();
+    loadConversionRate();
   }, []);
+
+  const loadConversionRate = async () => {
+    const rate = await getLatestConversionRate();
+    setConversionRate(rate);
+  };
   const checkAuth = async () => {
     const {
       data: {
@@ -157,13 +163,14 @@ export default function WalletDeposit() {
             <DollarSign className="w-5 h-5" />
             Deposit Request
           </CardTitle>
-          <CardDescription className="text-text-secondary">KINDLY SEND UR AMOUNT ON THE GIVEN NUMBER AND MAKE SURE TO SEND ATLEAST 180 PKR AS THE DEPOSIT LIMIT IS 2-ZC MINIMUM [1 Z-CRED = 90 PKR ]
-
-03282673854
- MUHAMMAD SAQIB
-EASY PAISA 
-
-        </CardDescription>
+          <CardDescription className="text-text-secondary">
+            Send your amount to the number below. Minimum deposit: {MIN_DEPOSIT_PKR} PKR (2 Z-Credits)
+            <br />Current rate: 1 Z-Credit = {conversionRate} PKR
+            <br /><br />
+            <strong>03282673854</strong><br />
+            MUHAMMAD SAQIB<br />
+            EASY PAISA
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -171,7 +178,22 @@ EASY PAISA
               <Label htmlFor="amount_money" className="text-text-primary">
                 Amount (PKR) <span className="text-danger">*</span>
               </Label>
-              <Input id="amount_money" type="number" step="0.01" min="1" value={formData.amount_money} onChange={e => handleInputChange('amount_money', e.target.value)} placeholder="Enter transfer amount" className="rounded-2xl" required />
+              <Input 
+                id="amount_money" 
+                type="number" 
+                step="0.01" 
+                min={MIN_DEPOSIT_PKR} 
+                value={formData.amount_money} 
+                onChange={e => handleInputChange('amount_money', e.target.value)} 
+                placeholder={`Minimum ${MIN_DEPOSIT_PKR} PKR`} 
+                className="rounded-2xl" 
+                required 
+              />
+              {formData.amount_money && (
+                <p className="text-sm text-text-secondary">
+                  ≈ {convertPkrToZc(parseFloat(formData.amount_money) || 0, conversionRate).toFixed(2)} Z-Credits
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -227,7 +249,8 @@ EASY PAISA
               <h3 className="font-semibold text-text-primary mb-2">Important Information</h3>
               <ul className="text-sm text-text-secondary space-y-1">
                 <li>• Deposits are manually reviewed and processed within 24 hours</li>
-                <li>• Exchange rate: 90 PKR = 1 Z-Credit (rounded up)</li>
+                <li>• Exchange rate: {conversionRate} PKR = 1 Z-Credit</li>
+                <li>• Minimum deposit: {MIN_DEPOSIT_PKR} PKR</li>
                 <li>• Ensure all transfer details are accurate</li>
                 <li>• Include a clear screenshot of your transfer receipt</li>
               </ul>

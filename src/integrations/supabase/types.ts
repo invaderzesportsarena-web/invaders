@@ -621,32 +621,54 @@ export type Database = {
       zcred_transactions: {
         Row: {
           amount: number
+          balance_after: number | null
           created_at: string
           id: string
+          reason: string | null
           ref: Json | null
+          reference: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           status: Database["public"]["Enums"]["zt_status"]
           type: Database["public"]["Enums"]["zt_type"]
           user_id: string
         }
         Insert: {
           amount: number
+          balance_after?: number | null
           created_at?: string
           id?: string
+          reason?: string | null
           ref?: Json | null
+          reference?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["zt_status"]
           type: Database["public"]["Enums"]["zt_type"]
           user_id: string
         }
         Update: {
           amount?: number
+          balance_after?: number | null
           created_at?: string
           id?: string
+          reason?: string | null
           ref?: Json | null
+          reference?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["zt_status"]
           type?: Database["public"]["Enums"]["zt_type"]
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "zcred_transactions_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "me"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "zcred_transactions_user_id_fkey"
             columns: ["user_id"]
@@ -789,6 +811,17 @@ export type Database = {
       make_user_admin: {
         Args: { target_user_id: string }
         Returns: undefined
+      }
+      manual_zcred_adjustment: {
+        Args: {
+          p_admin_id?: string
+          p_allow_negative?: boolean
+          p_delta_zc: number
+          p_reason: string
+          p_reference?: string
+          p_user_id: string
+        }
+        Returns: Json
       }
       register_for_tournament: {
         Args: {

@@ -6,12 +6,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Wallet, Check, X, Eye, User } from "lucide-react";
+import { ArrowLeft, Wallet, Check, X, Eye, User, Settings, Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { AdminGuard } from "@/components/AdminGuard";
 import { formatZcreds, formatZcredDisplay } from "@/utils/formatZcreds";
+import { getLatestConversionRate, convertZcToPkr, convertPkrToZc } from "@/utils/conversionRate";
 import { SUPABASE_CONFIG, VALIDATION } from "@/config/supabase";
 import {
   Dialog,
@@ -44,6 +45,8 @@ interface DepositRequest {
   status: string;
   created_at: string;
   notes?: string;
+  approved_credits?: number;
+  rejection_reason?: string;
   profiles?: {
     display_name: string;
     username: string;
@@ -61,6 +64,8 @@ interface WithdrawalRequest {
   status: string;
   created_at: string;
   notes?: string;
+  approved_credits?: number;
+  rejection_reason?: string;
   profiles?: {
     display_name: string;
     username: string;
@@ -70,6 +75,13 @@ interface WithdrawalRequest {
 export default function AdminWalletRequests() {
   const [deposits, setDeposits] = useState<DepositRequest[]>([]);
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
+  const [pendingDeposits, setPendingDeposits] = useState<DepositRequest[]>([]);
+  const [approvedDeposits, setApprovedDeposits] = useState<DepositRequest[]>([]);
+  const [rejectedDeposits, setRejectedDeposits] = useState<DepositRequest[]>([]);
+  const [pendingWithdrawals, setPendingWithdrawals] = useState<WithdrawalRequest[]>([]);
+  const [approvedWithdrawals, setApprovedWithdrawals] = useState<WithdrawalRequest[]>([]);
+  const [rejectedWithdrawals, setRejectedWithdrawals] = useState<WithdrawalRequest[]>([]);
+  const [conversionRate, setConversionRate] = useState<number>(90);
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState<any>(null);
   const [actionForm, setActionForm] = useState({
@@ -80,36 +92,53 @@ export default function AdminWalletRequests() {
 
   useEffect(() => {
     fetchData();
+    loadConversionRate();
   }, []);
+
+  const loadConversionRate = async () => {
+    const rate = await getLatestConversionRate();
+    setConversionRate(rate);
+  };
 
   const fetchData = async () => {
     try {
-      // Fetch pending deposits
-      const { data: depositsData, error: depositsError } = await supabase
+      // Fetch all deposits by status
+      const { data: allDepositsData, error: depositsError } = await supabase
         .from(SUPABASE_CONFIG.tables.ZCRED_DEPOSIT_FORMS)
         .select(`
           *,
           profiles!inner (display_name, username)
         `)
-        .eq(SUPABASE_CONFIG.columns.zcred_deposit_forms.STATUS, 'submitted')
         .order(SUPABASE_CONFIG.columns.zcred_deposit_forms.CREATED_AT, { ascending: false });
 
       if (depositsError) throw depositsError;
 
-      // Fetch pending withdrawals
-      const { data: withdrawalsData, error: withdrawalsError } = await supabase
+      // Fetch all withdrawals by status
+      const { data: allWithdrawalsData, error: withdrawalsError } = await supabase
         .from(SUPABASE_CONFIG.tables.ZCRED_WITHDRAWAL_FORMS)
         .select(`
           *,
           profiles!inner (display_name, username)
         `)
-        .eq(SUPABASE_CONFIG.columns.zcred_withdrawal_forms.STATUS, 'submitted')
         .order(SUPABASE_CONFIG.columns.zcred_withdrawal_forms.CREATED_AT, { ascending: false });
 
       if (withdrawalsError) throw withdrawalsError;
 
-      setDeposits(depositsData || []);
-      setWithdrawals(withdrawalsData || []);
+      // Separate by status
+      const allDeposits = allDepositsData || [];
+      const allWithdrawals = allWithdrawalsData || [];
+
+      setPendingDeposits(allDeposits.filter(d => d.status === 'submitted'));
+      setApprovedDeposits(allDeposits.filter(d => d.status === 'verified'));
+      setRejectedDeposits(allDeposits.filter(d => d.status === 'rejected'));
+
+      setPendingWithdrawals(allWithdrawals.filter(w => w.status === 'submitted'));
+      setApprovedWithdrawals(allWithdrawals.filter(w => w.status === 'paid'));
+      setRejectedWithdrawals(allWithdrawals.filter(w => w.status === 'rejected'));
+
+      // Keep the old arrays for backward compatibility
+      setDeposits(allDeposits.filter(d => d.status === 'submitted'));
+      setWithdrawals(allWithdrawals.filter(w => w.status === 'submitted'));
     } catch (error: any) {
       console.error('Error fetching wallet requests:', error);
       toast({
@@ -350,38 +379,64 @@ export default function AdminWalletRequests() {
             </Link>
           </Button>
           
-          <h1 className="text-3xl font-bold text-text-primary mb-2">
-            Wallet Requests
-          </h1>
-          <p className="text-text-secondary">
-            Review and process deposit and withdrawal requests
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-text-primary mb-2">
+                Wallet Requests
+              </h1>
+              <p className="text-text-secondary">
+                Review and process deposit and withdrawal requests
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button asChild variant="outline">
+                <Link to="/admin/manual-adjustment">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Manual Adjustment
+                </Link>
+              </Button>
+            </div>
+          </div>
         </div>
 
         <Card className="esports-card">
           <CardHeader>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                <Wallet className="w-5 h-5 text-primary" />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <Wallet className="w-5 h-5 text-primary" />
+                </div>
+                <CardTitle className="text-text-primary">Wallet Requests</CardTitle>
               </div>
-              <CardTitle className="text-text-primary">Wallet Requests</CardTitle>
+              <div className="text-right">
+                <p className="text-sm text-text-secondary">Current Rate</p>
+                <p className="text-lg font-bold text-primary">1 ZC = {conversionRate} PKR</p>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="deposits" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="deposits">Deposits ({deposits.length})</TabsTrigger>
-                <TabsTrigger value="withdrawals">Withdrawals ({withdrawals.length})</TabsTrigger>
+                <TabsTrigger value="deposits">Deposits</TabsTrigger>
+                <TabsTrigger value="withdrawals">Withdrawals</TabsTrigger>
               </TabsList>
               
               <TabsContent value="deposits" className="space-y-4">
-                {deposits.length === 0 ? (
-                  <div className="py-12 text-center">
-                    <p className="text-text-secondary">No pending deposit requests</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {deposits.map((deposit) => (
+                <Tabs defaultValue="pending" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="pending">Pending ({pendingDeposits.length})</TabsTrigger>
+                    <TabsTrigger value="approved">Approved ({approvedDeposits.length})</TabsTrigger>
+                    <TabsTrigger value="rejected">Rejected ({rejectedDeposits.length})</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="pending" className="space-y-4">
+                    {pendingDeposits.length === 0 ? (
+                      <div className="py-12 text-center">
+                        <p className="text-text-secondary">No pending deposit requests</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {pendingDeposits.map((deposit) => (
                       <div key={deposit.id} className="bg-secondary/30 rounded-2xl p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
@@ -390,6 +445,7 @@ export default function AdminWalletRequests() {
                             </div>
                             <div>
                               <span className="font-medium text-text-primary">Amount:</span> {deposit.amount_money.toFixed(2)} {deposit.currency}
+                              <div className="text-xs text-text-muted">≈ {formatZcreds(convertPkrToZc(deposit.amount_money, conversionRate))} ZC</div>
                             </div>
                             <div>
                               <span className="font-medium text-text-primary">Bank:</span> {deposit.sender_bank}
@@ -455,13 +511,16 @@ export default function AdminWalletRequests() {
                                      )}
 
                                      <div className="space-y-4">
-                                       <div className="bg-primary/10 rounded-xl p-4 space-y-3">
-                                         <div className="text-center">
-                                           <p className="text-text-secondary text-sm">PKR Amount</p>
-                                           <p className="text-2xl font-bold text-text-primary">
-                                             {selectedRequest.amount_money.toFixed(2)} {selectedRequest.currency}
-                                           </p>
-                                         </div>
+                                        <div className="bg-primary/10 rounded-xl p-4 space-y-3">
+                                          <div className="text-center">
+                                            <p className="text-text-secondary text-sm">PKR Amount</p>
+                                            <p className="text-2xl font-bold text-text-primary">
+                                              {selectedRequest.amount_money.toFixed(2)} {selectedRequest.currency}
+                                            </p>
+                                            <p className="text-sm text-text-secondary">
+                                              Auto-calculated: ≈ {formatZcreds(convertPkrToZc(selectedRequest.amount_money, conversionRate))} ZC
+                                            </p>
+                                          </div>
                                          <div className="border-t border-border pt-3">
                                            <Label htmlFor="credits" className="text-base font-medium text-center block mb-2">
                                              Admin: Enter Z-Credits to Grant
@@ -556,19 +615,95 @@ export default function AdminWalletRequests() {
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="approved" className="space-y-4">
+                    {approvedDeposits.length === 0 ? (
+                      <div className="py-12 text-center">
+                        <p className="text-text-secondary">No approved deposits</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {approvedDeposits.map((deposit) => (
+                          <div key={deposit.id} className="bg-success/10 rounded-2xl p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
+                                <div>
+                                  <span className="font-medium text-text-primary">User:</span> {deposit.profiles?.display_name || deposit.profiles?.username}
+                                </div>
+                                <div>
+                                  <span className="font-medium text-text-primary">Amount:</span> {deposit.amount_money.toFixed(2)} {deposit.currency}
+                                  <div className="text-xs text-text-muted">≈ {formatZcreds(convertPkrToZc(deposit.amount_money, conversionRate))} ZC</div>
+                                </div>
+                                <div>
+                                  <span className="font-medium text-text-primary">Approved:</span> {deposit.approved_credits ? formatZcreds(deposit.approved_credits) + ' ZC' : 'N/A'}
+                                </div>
+                                <div>
+                                  <span className="font-medium text-text-primary">Date:</span> {formatDate(deposit.created_at)}
+                                </div>
+                              </div>
+                              <Badge variant="default" className="bg-success text-white">Approved</Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="rejected" className="space-y-4">
+                    {rejectedDeposits.length === 0 ? (
+                      <div className="py-12 text-center">
+                        <p className="text-text-secondary">No rejected deposits</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {rejectedDeposits.map((deposit) => (
+                          <div key={deposit.id} className="bg-danger/10 rounded-2xl p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
+                                <div>
+                                  <span className="font-medium text-text-primary">User:</span> {deposit.profiles?.display_name || deposit.profiles?.username}
+                                </div>
+                                <div>
+                                  <span className="font-medium text-text-primary">Amount:</span> {deposit.amount_money.toFixed(2)} {deposit.currency}
+                                  <div className="text-xs text-text-muted">≈ {formatZcreds(convertPkrToZc(deposit.amount_money, conversionRate))} ZC</div>
+                                </div>
+                                <div>
+                                  <span className="font-medium text-text-primary">Reason:</span> {deposit.rejection_reason || 'No reason provided'}
+                                </div>
+                                <div>
+                                  <span className="font-medium text-text-primary">Date:</span> {formatDate(deposit.created_at)}
+                                </div>
+                              </div>
+                              <Badge variant="destructive">Rejected</Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
               
               <TabsContent value="withdrawals" className="space-y-4">
-                {withdrawals.length === 0 ? (
-                  <div className="py-12 text-center">
-                    <p className="text-text-secondary">No pending withdrawal requests</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {withdrawals.map((withdrawal) => (
+                <Tabs defaultValue="pending" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="pending">Pending ({pendingWithdrawals.length})</TabsTrigger>
+                    <TabsTrigger value="approved">Paid ({approvedWithdrawals.length})</TabsTrigger>
+                    <TabsTrigger value="rejected">Rejected ({rejectedWithdrawals.length})</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="pending" className="space-y-4">
+                    {pendingWithdrawals.length === 0 ? (
+                      <div className="py-12 text-center">
+                        <p className="text-text-secondary">No pending withdrawal requests</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {pendingWithdrawals.map((withdrawal) => (
                       <div key={withdrawal.id} className="bg-secondary/30 rounded-2xl p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
@@ -724,9 +859,75 @@ export default function AdminWalletRequests() {
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="approved" className="space-y-4">
+                    {approvedWithdrawals.length === 0 ? (
+                      <div className="py-12 text-center">
+                        <p className="text-text-secondary">No paid withdrawals</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {approvedWithdrawals.map((withdrawal) => (
+                          <div key={withdrawal.id} className="bg-success/10 rounded-2xl p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
+                                <div>
+                                  <span className="font-medium text-text-primary">User:</span> {withdrawal.profiles?.display_name || withdrawal.profiles?.username}
+                                </div>
+                                <div>
+                                  <span className="font-medium text-text-primary">Requested:</span> {formatZcredDisplay(withdrawal.amount_zcreds)}
+                                </div>
+                                <div>
+                                  <span className="font-medium text-text-primary">Paid:</span> {withdrawal.approved_credits ? formatZcreds(withdrawal.approved_credits) + ' ZC' : 'N/A'}
+                                </div>
+                                <div>
+                                  <span className="font-medium text-text-primary">Date:</span> {formatDate(withdrawal.created_at)}
+                                </div>
+                              </div>
+                              <Badge variant="default" className="bg-success text-white">Paid</Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="rejected" className="space-y-4">
+                    {rejectedWithdrawals.length === 0 ? (
+                      <div className="py-12 text-center">
+                        <p className="text-text-secondary">No rejected withdrawals</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {rejectedWithdrawals.map((withdrawal) => (
+                          <div key={withdrawal.id} className="bg-danger/10 rounded-2xl p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
+                                <div>
+                                  <span className="font-medium text-text-primary">User:</span> {withdrawal.profiles?.display_name || withdrawal.profiles?.username}
+                                </div>
+                                <div>
+                                  <span className="font-medium text-text-primary">Amount:</span> {formatZcredDisplay(withdrawal.amount_zcreds)}
+                                </div>
+                                <div>
+                                  <span className="font-medium text-text-primary">Reason:</span> {withdrawal.rejection_reason || 'No reason provided'}
+                                </div>
+                                <div>
+                                  <span className="font-medium text-text-primary">Date:</span> {formatDate(withdrawal.created_at)}
+                                </div>
+                              </div>
+                              <Badge variant="destructive">Rejected</Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </TabsContent>
             </Tabs>
           </CardContent>

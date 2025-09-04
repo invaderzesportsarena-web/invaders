@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import { formatZcreds, formatZcredDisplay, formatPkrFromZcreds } from "@/utils/formatZcreds";
+import { getLatestConversionRate } from "@/utils/conversionRate";
 
 interface Transaction {
   id: string;
@@ -21,13 +22,20 @@ export default function Wallet() {
   const [user, setUser] = useState<any>(null);
   const [balance, setBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [conversionRate, setConversionRate] = useState<number>(90);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     checkAuth();
+    loadConversionRate();
   }, []);
+
+  const loadConversionRate = async () => {
+    const rate = await getLatestConversionRate();
+    setConversionRate(rate);
+  };
 
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -45,9 +53,9 @@ export default function Wallet() {
 
   const fetchBalance = async (userId: string) => {
     try {
-      // First try to get existing balance
+      // Use the proper zcred_wallets table
       const { data, error } = await supabase
-        .from('zcred_balances')
+        .from('zcred_wallets')
         .select('balance')
         .eq('user_id', userId)
         .single();
@@ -90,8 +98,9 @@ export default function Wallet() {
     switch (type) {
       case 'deposit_credit': return 'Deposit';
       case 'withdrawal_payout': return 'Withdrawal';
-      case 'adjust': return 'Adjust';
-      default: return type;
+      case 'manual_adjustment': return 'Manual Adjustment';
+      case 'tournament_entry': return 'Tournament Entry';
+      default: return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
     }
   };
 
@@ -138,7 +147,7 @@ export default function Wallet() {
               My Wallet
             </span>
             <div className="text-lg font-normal text-text-secondary mt-2">
-              1 Z-Cred = 90 PKR
+              1 Z-Cred = {conversionRate} PKR
             </div>
           </h1>
         </div>
@@ -163,7 +172,7 @@ export default function Wallet() {
                 {formatZcreds(balance)} ZC
               </div>
               <div className="text-sm text-text-secondary">
-                ≈ {formatPkrFromZcreds(balance, 90)}
+                ≈ PKR {(balance * conversionRate).toFixed(2)}
               </div>
             </div>
           </div>

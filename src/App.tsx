@@ -25,6 +25,8 @@ import AdminProducts from "./pages/AdminProducts";
 import AdminResults from "./pages/AdminResults";
 import AdminSettings from "./pages/AdminSettings";
 import AdminTournaments from "./pages/AdminTournaments";
+import AdminWalletRequests from "./pages/AdminWalletRequests";
+import AdminManualAdjustment from "./pages/AdminManualAdjustment";
 import BackgroundRemoval from "./pages/BackgroundRemoval";
 
 const queryClient = new QueryClient();
@@ -57,6 +59,8 @@ const App = () => (
           <Route path="/admin/registrations" element={<AdminRegistrations />} />
           <Route path="/admin/tournaments" element={<AdminTournaments />} />
           <Route path="/admin/wallet" element={<AdminWallet />} />
+          <Route path="/admin/wallet-requests" element={<AdminWalletRequests />} />
+          <Route path="/admin/manual-adjustment" element={<AdminManualAdjustment />} />
           <Route path="/admin/posts" element={<AdminPosts />} />
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/results" element={<AdminResults />} />
