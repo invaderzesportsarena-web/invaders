@@ -53,7 +53,7 @@ export default function Home() {
         <div className="container relative z-10 mx-auto text-center max-w-5xl">
           <div className="flex justify-center mb-12">
             <img 
-              src="/lovable-uploads/4de647a3-ac26-436e-b0f7-c8d3be4d9d95.png" 
+              src="/lovable-uploads/2650bb7d-0862-44dc-9f88-90a0444a40fe.png" 
               alt="InvaderZ Esports Arena" 
               className="h-24 md:h-32"
             />
@@ -198,7 +198,7 @@ export default function Home() {
         <div className="container mx-auto max-w-4xl text-center">
           <div className="flex justify-center mb-8">
             <img 
-              src="/lovable-uploads/f9f3a6b3-c3ad-4a21-80de-dc3f51413874.png" 
+              src="/lovable-uploads/61757783-88f2-438c-9551-0e80c1f19425.png" 
               alt="InvaderZ Emblem" 
               className="h-12 opacity-60"
             />
