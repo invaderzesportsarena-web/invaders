@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Upload, DollarSign } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { validateZcredInput, parseZcreds } from "@/utils/formatZcreds";
 export default function WalletDeposit() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);

@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
+import { validateZcredInput, parseZcreds, formatZcreds } from "@/utils/formatZcreds";
 
 interface Tournament {
   id: string;
@@ -40,7 +41,7 @@ interface TournamentFormData {
   starts_at: string;
   reg_starts_at: string;
   reg_closes_at: string;
-  entry_fee_credits: number;
+  entry_fee_credits: string;
   slots: number;
   state: "draft" | "registration_open" | "locked" | "in_progress" | "completed";
   cover_url: string;
@@ -49,7 +50,7 @@ interface TournamentFormData {
 
 interface Prize {
   rank: number;
-  amount_zcred: number;
+  amount_zcred: string;
   note?: string;
 }
 
@@ -60,7 +61,7 @@ const initialFormData: TournamentFormData = {
   starts_at: "",
   reg_starts_at: "",
   reg_closes_at: "",
-  entry_fee_credits: 0,
+  entry_fee_credits: "0",
   slots: 0,
   state: "registration_open",
   cover_url: "",
@@ -145,7 +146,7 @@ export default function AdminTournaments() {
       const payload = {
         ...formData,
         cover_url,
-        entry_fee_credits: parseInt(formData.entry_fee_credits.toString()) || 0,
+        entry_fee_credits: parseZcreds(formData.entry_fee_credits),
         slots: parseInt(formData.slots.toString()) || null,
         starts_at: formData.starts_at || null,
         reg_starts_at: formData.reg_starts_at || null,
@@ -189,7 +190,7 @@ export default function AdminTournaments() {
           const { error: prizeError } = await supabase.rpc('upsert_prize', {
             p_tournament_id: tournamentId,
             p_rank: prize.rank,
-            p_amount: prize.amount_zcred,
+            p_amount: parseZcreds(prize.amount_zcred),
             p_note: prize.note || null
           });
           
@@ -236,13 +237,13 @@ export default function AdminTournaments() {
       starts_at: tournament.starts_at ? format(new Date(tournament.starts_at), "yyyy-MM-dd'T'HH:mm") : "",
       reg_starts_at: tournament.reg_starts_at ? format(new Date(tournament.reg_starts_at), "yyyy-MM-dd'T'HH:mm") : "",
       reg_closes_at: tournament.reg_closes_at ? format(new Date(tournament.reg_closes_at), "yyyy-MM-dd'T'HH:mm") : "",
-      entry_fee_credits: tournament.entry_fee_credits,
+      entry_fee_credits: formatZcreds(tournament.entry_fee_credits),
       slots: tournament.slots || 0,
       state: tournament.state as "draft" | "registration_open" | "locked" | "in_progress" | "completed",
       cover_url: tournament.cover_url || "",
       prizes: prizes?.map(p => ({
         rank: p.rank,
-        amount_zcred: p.amount_zcred,
+        amount_zcred: formatZcreds(p.amount_zcred),
         note: p.note || ""
       })) || []
     });
@@ -431,13 +432,19 @@ export default function AdminTournaments() {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="entry_fee_credits">Entry Fee (Credits)</Label>
+                    <Label htmlFor="entry_fee_credits">Entry Fee (Z-Credits)</Label>
                     <Input
                       id="entry_fee_credits"
-                      type="number"
-                      min="0"
+                      type="text"
+                      step="0.01"
+                      placeholder="0.00"
                       value={formData.entry_fee_credits}
-                      onChange={(e) => setFormData({ ...formData, entry_fee_credits: parseInt(e.target.value) || 0 })}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '' || validateZcredInput(value)) {
+                          setFormData({ ...formData, entry_fee_credits: value });
+                        }
+                      }}
                     />
                   </div>
                   <div>
@@ -486,7 +493,7 @@ export default function AdminTournaments() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        const newPrize = { rank: formData.prizes.length + 1, amount_zcred: 0, note: "" };
+                        const newPrize = { rank: formData.prizes.length + 1, amount_zcred: "0", note: "" };
                         setFormData({ ...formData, prizes: [...formData.prizes, newPrize] });
                       }}
                     >
@@ -520,16 +527,19 @@ export default function AdminTournaments() {
                           <div className="col-span-3">
                             <Label className="text-xs">Amount (ZC)</Label>
                             <Input
-                              type="number"
-                              min="0"
+                              type="text"
+                              step="0.01"
+                              placeholder="0.00"
                               value={prize.amount_zcred}
                               onChange={(e) => {
-                                const newPrizes = [...formData.prizes];
-                                newPrizes[index].amount_zcred = parseInt(e.target.value) || 0;
-                                setFormData({ ...formData, prizes: newPrizes });
+                                const value = e.target.value;
+                                if (value === '' || validateZcredInput(value)) {
+                                  const newPrizes = [...formData.prizes];
+                                  newPrizes[index].amount_zcred = value;
+                                  setFormData({ ...formData, prizes: newPrizes });
+                                }
                               }}
                               className="h-8 text-xs"
-                              placeholder="0"
                             />
                           </div>
                           <div className="col-span-5">

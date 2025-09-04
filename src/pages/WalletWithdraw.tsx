@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Minus, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { validateZcredInput, parseZcreds, formatZcreds, formatZcredDisplay, formatPkrFromZcreds } from "@/utils/formatZcreds";
 
 export default function WalletWithdraw() {
   const [user, setUser] = useState<any>(null);
@@ -75,7 +76,7 @@ export default function WalletWithdraw() {
       return;
     }
 
-    const withdrawAmount = parseInt(formData.amount_zcreds);
+    const withdrawAmount = parseZcreds(formData.amount_zcreds);
     
     // Check if user has sufficient balance
     if (withdrawAmount > balance) {
@@ -169,7 +170,7 @@ export default function WalletWithdraw() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-text-secondary">Available Balance</p>
-                <p className="text-2xl font-bold text-primary">{balance.toLocaleString()} ZC</p>
+                <p className="text-2xl font-bold text-primary">{formatZcredDisplay(balance)}</p>
               </div>
               <div className="text-right">
                 <p className="text-text-secondary text-sm">Exchange Rate</p>
@@ -198,17 +199,21 @@ export default function WalletWithdraw() {
                 </Label>
                 <Input
                   id="amount_zcreds"
-                  type="number"
-                  min="100"
-                  max={balance}
+                  type="text"
+                  step="0.01"
                   value={formData.amount_zcreds}
-                  onChange={(e) => handleInputChange('amount_zcreds', e.target.value)}
-                  placeholder="Enter amount to withdraw"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '' || validateZcredInput(value)) {
+                      handleInputChange('amount_zcreds', value);
+                    }
+                  }}
+                  placeholder="0.00"
                   className="rounded-2xl"
                   required
                 />
                 <p className="text-xs text-text-muted">
-                  Minimum: 100 ZC • Maximum: {balance.toLocaleString()} ZC
+                  Minimum: 100.00 ZC • Maximum: {formatZcreds(balance)} ZC
                 </p>
               </div>
 

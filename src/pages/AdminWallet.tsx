@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { AdminGuard } from "@/components/AdminGuard";
+import { formatZcreds, formatZcredDisplay, formatPkrFromZcreds } from "@/utils/formatZcreds";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -435,7 +436,7 @@ export default function AdminWallet() {
                                 <span className="font-medium text-text-primary">User:</span> {withdrawal.profiles?.display_name || withdrawal.user_id}
                               </div>
                               <div>
-                                <span className="font-medium text-text-primary">Amount:</span> {withdrawal.amount_zcreds} ZC
+                                <span className="font-medium text-text-primary">Amount:</span> {formatZcreds(withdrawal.amount_zcreds)} ZC
                               </div>
                               <div>
                                 <span className="font-medium text-text-primary">Bank:</span> {withdrawal.recipient_bank}
@@ -465,7 +466,7 @@ export default function AdminWallet() {
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Process Payout</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Are you sure you want to process this withdrawal of {withdrawal.amount_zcreds} Z-Credits?
+                                    Are you sure you want to process this withdrawal of {formatZcreds(withdrawal.amount_zcreds)} Z-Credits?
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -529,7 +530,7 @@ export default function AdminWallet() {
                               </span>
                             </div>
                             <div className={`font-medium ${transaction.amount >= 0 ? 'text-success' : 'text-destructive'}`}>
-                              {transaction.amount >= 0 ? '+' : ''}{transaction.amount} ZC
+                              {transaction.amount >= 0 ? '+' : ''}{formatZcreds(transaction.amount)} ZC
                             </div>
                             <Badge variant={transaction.status === 'approved' ? 'default' : 'secondary'}>
                               {transaction.status}

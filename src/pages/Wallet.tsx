@@ -7,6 +7,7 @@ import { Wallet as WalletIcon, Plus, Minus, TrendingUp, TrendingDown, ArrowLeft 
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
+import { formatZcreds, formatZcredDisplay, formatPkrFromZcreds } from "@/utils/formatZcreds";
 
 interface Transaction {
   id: string;
@@ -159,10 +160,10 @@ export default function Wallet() {
             </div>
             <div className="text-right">
               <div className="text-4xl font-heading font-bold text-primary">
-                {balance.toLocaleString()} ZC
+                {formatZcreds(balance)} ZC
               </div>
               <div className="text-sm text-text-secondary">
-                ≈ {(balance * 90).toLocaleString()} PKR
+                ≈ {formatPkrFromZcreds(balance, 90)}
               </div>
             </div>
           </div>
@@ -246,7 +247,7 @@ export default function Wallet() {
                       <p className={`font-bold ${
                         isPositive ? 'text-success' : 'text-danger'
                       }`}>
-                        {isPositive ? '+' : ''}{transaction.amount.toLocaleString()} ZC
+                        {isPositive ? '+' : ''}{formatZcreds(transaction.amount)} ZC
                       </p>
                       <Badge variant="secondary" className="text-xs">
                         {transaction.status}
