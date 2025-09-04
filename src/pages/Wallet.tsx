@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Wallet as WalletIcon, Plus, Minus, TrendingUp, TrendingDown } from "lucide-react";
+import { Wallet as WalletIcon, Plus, Minus, TrendingUp, TrendingDown, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
@@ -123,6 +123,14 @@ export default function Wallet() {
     <div className="min-h-screen">
       <Header />
       <div className="container mx-auto py-8 px-4 space-y-6">
+        {/* Back Navigation */}
+        <div className="mb-6">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center space-x-2">
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back</span>
+          </Button>
+        </div>
+
         <div className="flex items-center justify-between">
           <h1 className="text-4xl font-heading font-bold text-text-primary">
             <span className="bg-gradient-accent bg-clip-text text-transparent">

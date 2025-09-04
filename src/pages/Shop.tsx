@@ -3,9 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingBag, Package } from "lucide-react";
+import { ShoppingBag, Package, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
+import { useNavigate } from "react-router-dom";
 
 interface Product {
   id: string;
@@ -23,6 +24,7 @@ export default function Shop() {
   const [balance, setBalance] = useState<number>(0);
   const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     checkAuth();
@@ -147,14 +149,22 @@ export default function Shop() {
     <div className="min-h-screen">
       <Header />
       <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-heading font-bold text-text-primary mb-4">
-          Z-Credits <span className="bg-gradient-accent bg-clip-text text-transparent">Shop</span>
-        </h1>
-        <div className="flex items-center justify-between">
-          <p className="text-xl text-text-secondary">
-            Redeem your Z-Credits for exclusive rewards • Prices include PKR conversion
-          </p>
+        {/* Back Navigation */}
+        <div className="mb-6">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center space-x-2">
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back</span>
+          </Button>
+        </div>
+
+        <div className="mb-8">
+          <h1 className="text-4xl font-heading font-bold text-text-primary mb-4">
+            Z-Credits <span className="bg-gradient-accent bg-clip-text text-transparent">Shop</span>
+          </h1>
+          <div className="flex items-center justify-between">
+            <p className="text-xl text-text-secondary">
+              Redeem your Z-Credits for exclusive rewards • Prices include PKR conversion
+            </p>
           {user && (
             <div className="flex items-center gap-2 bg-card border border-border rounded-2xl px-4 py-2">
               <span className="w-6 h-6 text-center font-bold text-primary">Z</span>

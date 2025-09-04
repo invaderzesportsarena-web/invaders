@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, Trophy, Download, ExternalLink, Users } from "lucide-react";
+import { Calendar, Clock, Trophy, Download, ExternalLink, Users, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
@@ -365,6 +365,14 @@ export default function Tournaments() {
     <div className="min-h-screen">
       <Header />
       <div className="container mx-auto py-8 px-4">
+        {/* Back Navigation */}
+        <div className="mb-6">
+          <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center space-x-2">
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back</span>
+          </Button>
+        </div>
+
         <div className="mb-8">
           <h1 className="text-4xl font-heading font-bold text-text-primary mb-2">
             <span className="bg-gradient-accent bg-clip-text text-transparent">

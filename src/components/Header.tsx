@@ -3,10 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { Menu, X, Trophy, ShoppingBag, Wallet, Newspaper, BookOpen, UserCircle } from "lucide-react";
+import { Menu, X, Trophy, ShoppingBag, Wallet, Newspaper, BookOpen, UserCircle, Settings, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 export default function Header() {
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -14,6 +16,11 @@ export default function Header() {
     checkAuth();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user || null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setProfile(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -22,12 +29,26 @@ export default function Header() {
   const checkAuth = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     setUser(session?.user || null);
+    if (session?.user) {
+      fetchProfile(session.user.id);
+    }
+  };
+
+  const fetchProfile = async (userId: string) => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    setProfile(data);
   };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     navigate('/');
   };
+
+  const isAdmin = profile?.role === 'admin' || profile?.role === 'moderator';
 
   const navigation = [
     { name: 'Tournaments', href: '/tournaments', icon: Trophy },
@@ -68,12 +89,34 @@ export default function Header() {
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-4">
-                <Link to="/profile">
-                  <Button variant="ghost" size="sm" className="flex items-center space-x-2">
-                    <UserCircle className="w-4 h-4" />
-                    <span>Profile</span>
-                  </Button>
-                </Link>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="flex items-center space-x-2">
+                      <UserCircle className="w-4 h-4" />
+                      <span>Profile</span>
+                      <ChevronDown className="w-3 h-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="cursor-pointer">
+                        <UserCircle className="mr-2 h-4 w-4" />
+                        Profile Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    {isAdmin && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin" className="cursor-pointer">
+                            <Settings className="mr-2 h-4 w-4" />
+                            Admin Dashboard
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
                   Sign Out
                 </Button>
@@ -123,6 +166,14 @@ export default function Header() {
                         Profile
                       </Button>
                     </Link>
+                    {isAdmin && (
+                      <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
+                        <Button variant="ghost" size="sm" className="w-full justify-start">
+                          <Settings className="w-4 h-4 mr-2" />
+                          Admin Dashboard
+                        </Button>
+                      </Link>
+                    )}
                     <Button variant="outline" size="sm" onClick={handleSignOut}>
                       Sign Out
                     </Button>
