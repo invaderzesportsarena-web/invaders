@@ -443,23 +443,32 @@ export default function AdminWalletRequests() {
                                     )}
 
                                     <div className="space-y-4">
-                                      <div className="space-y-2">
-                                        <Label htmlFor="credits">Z-Credits to Grant</Label>
-                                        <Input
-                                          id="credits"
-                                          type="number"
-                                          step="0.01"
-                                          min="0"
-                                          inputMode="decimal"
-                                          value={actionForm.credits}
-                                          onChange={(e) => setActionForm(prev => ({ ...prev, credits: e.target.value }))}
-                                          placeholder="Enter Z-Credits amount"
-                                          className="rounded-xl"
-                                        />
-                                        <p className="text-xs text-text-muted">
-                                          Suggested: {Math.round(selectedRequest.amount_money / VALIDATION.EXCHANGE_RATE * 100) / 100} Z-Credits
-                                        </p>
+                                      <div className="bg-primary/10 rounded-xl p-4 space-y-3">
+                                        <div className="text-center">
+                                          <p className="text-text-secondary text-sm">Deposit Amount</p>
+                                          <p className="text-2xl font-bold text-text-primary">
+                                            {selectedRequest.amount_money.toFixed(2)} {selectedRequest.currency}
+                                          </p>
+                                        </div>
+                                        <div className="border-t border-border pt-3">
+                                          <Label htmlFor="credits" className="text-base font-medium">Z-Credits to Grant</Label>
+                                          <Input
+                                            id="credits"
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            inputMode="decimal"
+                                            value={actionForm.credits}
+                                            onChange={(e) => setActionForm(prev => ({ ...prev, credits: e.target.value }))}
+                                            placeholder="Enter Z-Credits amount"
+                                            className="rounded-xl mt-2 text-lg font-medium"
+                                          />
+                                        </div>
                                       </div>
+                                       <p className="text-xs text-text-muted">
+                                         Suggested: {Math.round(selectedRequest.amount_money / VALIDATION.EXCHANGE_RATE * 100) / 100} Z-Credits
+                                       </p>
+                                     </div>
 
                                       <div className="space-y-2">
                                         <Label htmlFor="reason">Rejection Reason (if rejecting)</Label>
