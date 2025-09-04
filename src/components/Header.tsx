@@ -65,9 +65,9 @@ export default function Header() {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <img 
-              src="/lovable-uploads/4de647a3-ac26-436e-b0f7-c8d3be4d9d95.png" 
+              src="/lovable-uploads/2650bb7d-0862-44dc-9f88-90a0444a40fe.png" 
               alt="InvaderZ Esports Arena" 
-              className="h-8 md:h-10"
+              className="h-12 md:h-16"
             />
           </Link>
 
