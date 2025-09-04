@@ -435,8 +435,9 @@ export default function AdminTournaments() {
                     <Label htmlFor="entry_fee_credits">Entry Fee (Z-Credits)</Label>
                     <Input
                       id="entry_fee_credits"
-                      type="text"
+                      type="number"
                       step="0.01"
+                      min="0"
                       placeholder="0.00"
                       value={formData.entry_fee_credits}
                       onChange={(e) => {
@@ -527,8 +528,9 @@ export default function AdminTournaments() {
                           <div className="col-span-3">
                             <Label className="text-xs">Amount (ZC)</Label>
                             <Input
-                              type="text"
+                              type="number"
                               step="0.01"
+                              min="0"
                               placeholder="0.00"
                               value={prize.amount_zcred}
                               onChange={(e) => {
@@ -641,7 +643,7 @@ export default function AdminTournaments() {
                         <TableCell>
                           {tournament.starts_at ? formatInTimeZone(new Date(tournament.starts_at), 'Asia/Karachi', 'MMM dd, h:mm a') : "-"}
                         </TableCell>
-                        <TableCell>{tournament.entry_fee_credits} ZC</TableCell>
+                        <TableCell>{formatZcreds(tournament.entry_fee_credits)} ZC</TableCell>
                         <TableCell>{formatInTimeZone(new Date(tournament.created_at), 'Asia/Karachi', 'MMM dd, h:mm a')}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end space-x-2">
