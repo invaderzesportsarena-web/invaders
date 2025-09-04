@@ -219,14 +219,25 @@ export default function AdminWalletRequests() {
     }
   };
 
-  const handleWithdrawalApprove = async (withdrawalId: string, userId: string, amount: number) => {
+  const handleWithdrawalApprove = async (withdrawalId: string, userId: string) => {
+    if (!actionForm.credits || !VALIDATION.ZCRED_REGEX.test(actionForm.credits)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid Z-Credits amount (up to 2 decimal places)",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
+      const creditsAmount = parseFloat(actionForm.credits);
+      
       // Insert debit transaction
       const { error: transError } = await supabase
         .from(SUPABASE_CONFIG.tables.ZCRED_TRANSACTIONS)
         .insert({
           user_id: userId,
-          amount: -amount,
+          amount: -creditsAmount,
           type: 'withdrawal_payout',
           status: 'approved'
         });
@@ -238,7 +249,7 @@ export default function AdminWalletRequests() {
         .from(SUPABASE_CONFIG.tables.ZCRED_WITHDRAWAL_FORMS)
         .update({ 
           status: 'paid',
-          approved_credits: amount,
+          approved_credits: creditsAmount,
           reviewed_by: (await supabase.auth.getUser()).data.user?.id,
           reviewed_at: new Date().toISOString()
         })
@@ -248,6 +259,7 @@ export default function AdminWalletRequests() {
 
       setWithdrawals(prev => prev.filter(w => w.id !== withdrawalId));
       setSelectedRequest(null);
+      setActionForm({ credits: '', reason: '' });
 
       toast({
         title: "Success",
@@ -440,19 +452,19 @@ export default function AdminWalletRequests() {
                                           className="w-full rounded-xl border"
                                         />
                                       </div>
-                                    )}
+                                     )}
 
                                      <div className="space-y-4">
                                        <div className="bg-primary/10 rounded-xl p-4 space-y-3">
                                          <div className="text-center">
-                                           <p className="text-text-secondary text-sm">Deposit Amount</p>
+                                           <p className="text-text-secondary text-sm">PKR Amount</p>
                                            <p className="text-2xl font-bold text-text-primary">
                                              {selectedRequest.amount_money.toFixed(2)} {selectedRequest.currency}
                                            </p>
                                          </div>
                                          <div className="border-t border-border pt-3">
                                            <Label htmlFor="credits" className="text-base font-medium text-center block mb-2">
-                                             🎯 Admin: Enter Custom Z-Credits Amount
+                                             Admin: Enter Z-Credits to Grant
                                            </Label>
                                            <div className="bg-background rounded-lg p-3 border-2 border-primary/20">
                                              <Input
@@ -563,9 +575,9 @@ export default function AdminWalletRequests() {
                             <div>
                               <span className="font-medium text-text-primary">User:</span> {withdrawal.profiles?.display_name || withdrawal.profiles?.username}
                             </div>
-                            <div>
-                              <span className="font-medium text-text-primary">Amount:</span> {formatZcredDisplay(withdrawal.amount_zcreds)}
-                            </div>
+                             <div>
+                               <span className="font-medium text-text-primary">Z-Credits:</span> {formatZcredDisplay(withdrawal.amount_zcreds)}
+                             </div>
                             <div>
                               <span className="font-medium text-text-primary">Bank:</span> {withdrawal.recipient_bank}
                             </div>
@@ -604,33 +616,58 @@ export default function AdminWalletRequests() {
                                       </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                      <span className="font-medium">Withdrawal Details</span>
-                                      <div className="bg-secondary/50 rounded-xl p-3 space-y-2 text-sm">
-                                        <div><span className="font-medium">Amount:</span> {formatZcredDisplay(selectedRequest.amount_zcreds)}</div>
-                                        <div><span className="font-medium">Recipient:</span> {selectedRequest.recipient_name}</div>
-                                        <div><span className="font-medium">Bank:</span> {selectedRequest.recipient_bank}</div>
-                                        <div><span className="font-medium">Account:</span> {selectedRequest.recipient_account_no}</div>
-                                        {selectedRequest.iban_optional && (
-                                          <div><span className="font-medium">IBAN:</span> {selectedRequest.iban_optional}</div>
-                                        )}
-                                        {selectedRequest.notes && (
-                                          <div><span className="font-medium">Notes:</span> {selectedRequest.notes}</div>
-                                        )}
-                                      </div>
-                                    </div>
+                                     <div className="space-y-2">
+                                       <span className="font-medium">Withdrawal Details</span>
+                                       <div className="bg-secondary/50 rounded-xl p-3 space-y-2 text-sm">
+                                         <div><span className="font-medium">Z-Credits:</span> {formatZcredDisplay(selectedRequest.amount_zcreds)}</div>
+                                         <div><span className="font-medium">Recipient:</span> {selectedRequest.recipient_name}</div>
+                                         <div><span className="font-medium">Bank:</span> {selectedRequest.recipient_bank}</div>
+                                         <div><span className="font-medium">Account:</span> {selectedRequest.recipient_account_no}</div>
+                                         {selectedRequest.iban_optional && (
+                                           <div><span className="font-medium">IBAN:</span> {selectedRequest.iban_optional}</div>
+                                         )}
+                                         <div><span className="font-medium">Date:</span> {formatDate(selectedRequest.created_at)}</div>
+                                         {selectedRequest.notes && (
+                                           <div><span className="font-medium">Notes:</span> {selectedRequest.notes}</div>
+                                         )}
+                                       </div>
+                                     </div>
 
-                                    <div className="space-y-4">
-                                      <div className="space-y-2">
-                                        <Label htmlFor="reason">Rejection Reason (if rejecting)</Label>
-                                        <Textarea
-                                          id="reason"
-                                          value={actionForm.reason}
-                                          onChange={(e) => setActionForm(prev => ({ ...prev, reason: e.target.value }))}
-                                          placeholder="Enter reason for rejection"
-                                          className="rounded-xl"
-                                        />
-                                      </div>
+                                     <div className="space-y-4">
+                                       <div className="bg-primary/10 rounded-xl p-4 space-y-3">
+                                         <div className="text-center">
+                                           <p className="text-text-secondary text-sm">Requested Amount</p>
+                                           <p className="text-2xl font-bold text-text-primary">
+                                             {formatZcredDisplay(selectedRequest.amount_zcreds)}
+                                           </p>
+                                         </div>
+                                         <div className="border-t border-border pt-3">
+                                           <Label htmlFor="credits" className="text-base font-medium text-center block mb-2">
+                                             Admin: Enter Z-Credits to Deduct
+                                           </Label>
+                                           <Input
+                                             id="credits"
+                                             type="number"
+                                             step="0.01"
+                                             min="0"
+                                             placeholder="Enter Z-Credits amount"
+                                             value={actionForm.credits}
+                                             onChange={(e) => setActionForm(prev => ({ ...prev, credits: e.target.value }))}
+                                             className="text-center text-lg font-medium"
+                                           />
+                                         </div>
+                                       </div>
+                                       
+                                       <div className="space-y-2">
+                                         <Label htmlFor="reason">Rejection Reason (if rejecting)</Label>
+                                         <Textarea
+                                           id="reason"
+                                           value={actionForm.reason}
+                                           onChange={(e) => setActionForm(prev => ({ ...prev, reason: e.target.value }))}
+                                           placeholder="Enter reason for rejection"
+                                           className="rounded-xl"
+                                         />
+                                       </div>
 
                                       <div className="flex gap-2">
                                         <Dialog>
@@ -649,9 +686,9 @@ export default function AdminWalletRequests() {
                                             </DialogHeader>
                                             <DialogFooter>
                                               <Button variant="outline">Cancel</Button>
-                                              <Button onClick={() => handleWithdrawalApprove(selectedRequest.id, selectedRequest.user_id, selectedRequest.amount_zcreds)}>
-                                                Approve
-                                              </Button>
+                                               <Button onClick={() => handleWithdrawalApprove(selectedRequest.id, selectedRequest.user_id)}>
+                                                 Approve
+                                               </Button>
                                             </DialogFooter>
                                           </DialogContent>
                                         </Dialog>
