@@ -8,6 +8,7 @@ import { Trophy, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { formatZcredDisplay } from "@/utils/formatZcreds";
+import { SUPABASE_CONFIG } from "@/config/supabase";
 
 interface Tournament {
   id: string;
@@ -28,9 +29,9 @@ export default function TournamentRegister() {
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
-    team_name: '',
-    contact_phone: '',
-    whatsapp_number: ''
+    [SUPABASE_CONFIG.columns.registrations.TEAM_NAME]: '',
+    [SUPABASE_CONFIG.columns.registrations.CONTACT_PHONE]: '',
+    [SUPABASE_CONFIG.columns.registrations.WHATSAPP_NUMBER]: ''
   });
 
   useEffect(() => {
@@ -54,9 +55,9 @@ export default function TournamentRegister() {
     
     try {
       const { data, error } = await supabase
-        .from('tournaments')
+        .from(SUPABASE_CONFIG.tables.TOURNAMENTS)
         .select('*')
-        .eq('id', id)
+        .eq(SUPABASE_CONFIG.columns.tournaments.ID, id)
         .single();
 
       if (error) throw error;
@@ -79,8 +80,12 @@ export default function TournamentRegister() {
     
     if (!user || !tournament) return;
 
-    // Validate form
-    if (!formData.team_name || !formData.contact_phone || !formData.whatsapp_number) {
+    // Validate form using schema-safe field names
+    const teamName = formData[SUPABASE_CONFIG.columns.registrations.TEAM_NAME];
+    const contactPhone = formData[SUPABASE_CONFIG.columns.registrations.CONTACT_PHONE];
+    const whatsappNumber = formData[SUPABASE_CONFIG.columns.registrations.WHATSAPP_NUMBER];
+    
+    if (!teamName || !contactPhone || !whatsappNumber) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -106,9 +111,9 @@ export default function TournamentRegister() {
 
     try {
       // Use the register_for_tournament function which handles balance validation
-      const { error } = await supabase.rpc('register_for_tournament', {
+      const { error } = await supabase.rpc(SUPABASE_CONFIG.functions.REGISTER_FOR_TOURNAMENT, {
         p_tournament_id: tournament.id,
-        p_team_name: formData.team_name,
+        p_team_name: teamName,
         p_entry_fee: tournament.entry_fee_credits
       });
 
@@ -117,14 +122,14 @@ export default function TournamentRegister() {
         if (error.message.includes('Insufficient Z-Creds')) {
           throw new Error('Not sufficient Z-Credits, kindly deposit more funds to your wallet');
         } else if (error.message.includes('Complete your profile')) {
-          throw new Error('Please complete your profile (username, in-game name, WhatsApp) before registering');
+          throw new Error('Please complete your profile (username, WhatsApp) before registering');
         }
         throw error;
       }
 
       toast({
         title: "Registration Successful!",
-        description: `Team "${formData.team_name}" has been registered successfully. Entry fee of ${tournament.entry_fee_credits} Z-Credits has been deducted.`,
+        description: `Team "${teamName}" has been registered successfully. Entry fee of ${formatZcredDisplay(tournament.entry_fee_credits)} has been deducted.`,
       });
 
       navigate(`/tournaments/${tournament.id}`);
@@ -204,8 +209,8 @@ export default function TournamentRegister() {
               </Label>
               <Input
                 id="team_name"
-                value={formData.team_name}
-                onChange={(e) => handleInputChange('team_name', e.target.value)}
+                value={formData[SUPABASE_CONFIG.columns.registrations.TEAM_NAME]}
+                onChange={(e) => handleInputChange(SUPABASE_CONFIG.columns.registrations.TEAM_NAME, e.target.value)}
                 placeholder="Enter your team name"
                 className="rounded-2xl"
                 required
@@ -219,8 +224,8 @@ export default function TournamentRegister() {
               <Input
                 id="contact_phone"
                 type="tel"
-                value={formData.contact_phone}
-                onChange={(e) => handleInputChange('contact_phone', e.target.value)}
+                value={formData[SUPABASE_CONFIG.columns.registrations.CONTACT_PHONE]}
+                onChange={(e) => handleInputChange(SUPABASE_CONFIG.columns.registrations.CONTACT_PHONE, e.target.value)}
                 placeholder="Enter your phone number"
                 className="rounded-2xl"
                 required
@@ -234,8 +239,8 @@ export default function TournamentRegister() {
               <Input
                 id="whatsapp_number"
                 type="tel"
-                value={formData.whatsapp_number}
-                onChange={(e) => handleInputChange('whatsapp_number', e.target.value)}
+                value={formData[SUPABASE_CONFIG.columns.registrations.WHATSAPP_NUMBER]}
+                onChange={(e) => handleInputChange(SUPABASE_CONFIG.columns.registrations.WHATSAPP_NUMBER, e.target.value)}
                 placeholder="Enter your WhatsApp number"
                 className="rounded-2xl"
                 required

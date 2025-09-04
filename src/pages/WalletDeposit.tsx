@@ -9,6 +9,8 @@ import { ArrowLeft, Upload, DollarSign } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { validateZcredInput, parseZcreds } from "@/utils/formatZcreds";
+import { StorageManager } from "@/utils/storageUtils";
+import { SUPABASE_CONFIG } from "@/config/supabase";
 export default function WalletDeposit() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -52,22 +54,21 @@ export default function WalletDeposit() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
+    
     setUploading(true);
     try {
-      const fileName = `${user.id}/${Date.now()}-${file.name}`;
-      const {
-        error: uploadError
-      } = await supabase.storage.from('proofs').upload(fileName, file);
-      if (uploadError) throw uploadError;
-      const {
-        data: {
-          publicUrl
-        }
-      } = supabase.storage.from('proofs').getPublicUrl(fileName);
+      const requestId = `deposit-${Date.now()}`;
+      const { url, error } = await StorageManager.uploadFile(file, user.id, requestId);
+      
+      if (error) {
+        throw new Error(error);
+      }
+      
       setFormData(prev => ({
         ...prev,
-        screenshot_url: publicUrl
+        screenshot_url: url
       }));
+      
       toast({
         title: "Upload successful",
         description: "Screenshot uploaded successfully"
@@ -76,7 +77,7 @@ export default function WalletDeposit() {
       console.error('Upload error:', error);
       toast({
         title: "Upload failed",
-        description: error.message || "Failed to upload screenshot",
+        description: error.message || "Upload failed. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -98,18 +99,18 @@ export default function WalletDeposit() {
     }
     setSubmitting(true);
     try {
-      const {
-        error
-      } = await supabase.from('zcred_deposit_forms').insert({
-        user_id: user.id,
-        amount_money: parseFloat(formData.amount_money),
-        bank_sender_name: formData.bank_sender_name,
-        sender_bank: formData.sender_bank,
-        sender_account_no: formData.sender_account_no,
-        transfer_timestamp: formData.transfer_timestamp,
-        screenshot_url: formData.screenshot_url,
-        notes: formData.notes
-      });
+      const { error } = await supabase
+        .from(SUPABASE_CONFIG.tables.ZCRED_DEPOSIT_FORMS)
+        .insert({
+          [SUPABASE_CONFIG.columns.zcred_deposit_forms.USER_ID]: user.id,
+          [SUPABASE_CONFIG.columns.zcred_deposit_forms.AMOUNT_MONEY]: parseFloat(formData.amount_money),
+          [SUPABASE_CONFIG.columns.zcred_deposit_forms.BANK_SENDER_NAME]: formData.bank_sender_name,
+          [SUPABASE_CONFIG.columns.zcred_deposit_forms.SENDER_BANK]: formData.sender_bank,
+          [SUPABASE_CONFIG.columns.zcred_deposit_forms.SENDER_ACCOUNT_NO]: formData.sender_account_no,
+          [SUPABASE_CONFIG.columns.zcred_deposit_forms.TRANSFER_TIMESTAMP]: formData.transfer_timestamp,
+          [SUPABASE_CONFIG.columns.zcred_deposit_forms.SCREENSHOT_URL]: formData.screenshot_url,
+          [SUPABASE_CONFIG.columns.zcred_deposit_forms.NOTES]: formData.notes
+        });
       if (error) throw error;
       toast({
         title: "Deposit request submitted!",

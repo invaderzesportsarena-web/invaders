@@ -9,6 +9,7 @@ import { ArrowLeft, Minus, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { validateZcredInput, parseZcreds, formatZcreds, formatZcredDisplay, formatPkrFromZcreds } from "@/utils/formatZcreds";
+import { SUPABASE_CONFIG, VALIDATION } from "@/config/supabase";
 
 export default function WalletWithdraw() {
   const [user, setUser] = useState<any>(null);
@@ -45,7 +46,7 @@ export default function WalletWithdraw() {
   const fetchBalance = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('zcred_balances')
+        .from(SUPABASE_CONFIG.tables.ZCRED_WALLETS)
         .select('balance')
         .eq('user_id', userId)
         .single();
@@ -54,6 +55,11 @@ export default function WalletWithdraw() {
       setBalance(data?.balance || 0);
     } catch (error) {
       console.error('Error fetching balance:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load balance",
+        variant: "destructive"
+      });
     }
   };
 
@@ -76,6 +82,16 @@ export default function WalletWithdraw() {
       return;
     }
 
+    // Validate amount format using centralized regex
+    if (!VALIDATION.ZCRED_REGEX.test(formData.amount_zcreds)) {
+      toast({
+        title: "Error",
+        description: "Please enter a valid amount (up to 2 decimal places)",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const withdrawAmount = parseZcreds(formData.amount_zcreds);
     
     // Check if user has sufficient balance
@@ -89,10 +105,10 @@ export default function WalletWithdraw() {
     }
 
     // Minimum withdrawal check
-    if (withdrawAmount < 100) {
+    if (withdrawAmount < 2) {
       toast({
         title: "Minimum Withdrawal",
-        description: "Minimum withdrawal amount is 100 Z-Credits",
+        description: "Minimum withdrawal amount is 2.00 Z-Credits",
         variant: "destructive"
       });
       return;
@@ -101,15 +117,15 @@ export default function WalletWithdraw() {
     setSubmitting(true);
     try {
       const { error } = await supabase
-        .from('zcred_withdrawal_forms')
+        .from(SUPABASE_CONFIG.tables.ZCRED_WITHDRAWAL_FORMS)
         .insert({
-          user_id: user.id,
-          amount_zcreds: withdrawAmount,
-          recipient_name: formData.recipient_name,
-          recipient_bank: formData.recipient_bank,
-          recipient_account_no: formData.recipient_account_no,
-          iban_optional: formData.iban_optional,
-          notes: formData.notes
+          [SUPABASE_CONFIG.columns.zcred_withdrawal_forms.USER_ID]: user.id,
+          [SUPABASE_CONFIG.columns.zcred_withdrawal_forms.AMOUNT_ZCREDS]: withdrawAmount,
+          [SUPABASE_CONFIG.columns.zcred_withdrawal_forms.RECIPIENT_NAME]: formData.recipient_name,
+          [SUPABASE_CONFIG.columns.zcred_withdrawal_forms.RECIPIENT_BANK]: formData.recipient_bank,
+          [SUPABASE_CONFIG.columns.zcred_withdrawal_forms.RECIPIENT_ACCOUNT_NO]: formData.recipient_account_no,
+          [SUPABASE_CONFIG.columns.zcred_withdrawal_forms.IBAN_OPTIONAL]: formData.iban_optional || null,
+          [SUPABASE_CONFIG.columns.zcred_withdrawal_forms.NOTES]: formData.notes || null
         });
 
       if (error) throw error;
@@ -174,7 +190,7 @@ export default function WalletWithdraw() {
               </div>
               <div className="text-right">
                 <p className="text-text-secondary text-sm">Exchange Rate</p>
-                <p className="text-text-primary font-semibold">1 ZC = 1 PKR</p>
+                <p className="text-text-primary font-semibold">1 ZC = {VALIDATION.EXCHANGE_RATE} PKR</p>
               </div>
             </div>
           </CardContent>
@@ -199,21 +215,18 @@ export default function WalletWithdraw() {
                 </Label>
                 <Input
                   id="amount_zcreds"
-                  type="text"
+                  type="number"
                   step="0.01"
+                  min="2"
+                  inputMode="decimal"
                   value={formData.amount_zcreds}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value === '' || validateZcredInput(value)) {
-                      handleInputChange('amount_zcreds', value);
-                    }
-                  }}
-                  placeholder="0.00"
+                  onChange={(e) => handleInputChange('amount_zcreds', e.target.value)}
+                  placeholder="2.00"
                   className="rounded-2xl"
                   required
                 />
                 <p className="text-xs text-text-muted">
-                  Minimum: 100.00 ZC • Maximum: {formatZcreds(balance)} ZC
+                  Minimum: 2.00 ZC • Maximum: {formatZcreds(balance)} ZC
                 </p>
               </div>
 
@@ -297,7 +310,7 @@ export default function WalletWithdraw() {
                       <li>• Withdrawal requests are processed within 24-48 hours</li>
                       <li>• Ensure all bank details are correct and match your ID</li>
                       <li>• Processing may take longer during weekends/holidays</li>
-                      <li>• Minimum withdrawal amount is 100 Z-Credits</li>
+                      <li>• Minimum withdrawal amount is 2.00 Z-Credits</li>
                     </ul>
                   </div>
                 </div>
@@ -315,7 +328,7 @@ export default function WalletWithdraw() {
                 <Button
                   type="submit"
                   variant="esports"
-                  disabled={submitting || balance < 100}
+                  disabled={submitting || balance < 2}
                   className="flex-1"
                 >
                   {submitting ? "Submitting..." : "Submit Withdrawal Request"}
