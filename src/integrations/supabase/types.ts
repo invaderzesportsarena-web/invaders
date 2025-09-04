@@ -44,6 +44,24 @@ export type Database = {
         }
         Relationships: []
       }
+      conversion_rate: {
+        Row: {
+          effective_date: string
+          id: number
+          rate: number
+        }
+        Insert: {
+          effective_date?: string
+          id?: number
+          rate: number
+        }
+        Update: {
+          effective_date?: string
+          id?: number
+          rate?: number
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           id: string
@@ -526,54 +544,66 @@ export type Database = {
       zcred_deposit_forms: {
         Row: {
           amount_money: number
+          amount_pkr: number | null
+          amount_zc: number | null
           approved_credits: number | null
           bank_sender_name: string
           created_at: string
           currency: string
           id: string
           notes: string | null
+          proof_url: string | null
           rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           screenshot_url: string | null
           sender_account_no: string
           sender_bank: string
+          sender_name: string | null
           status: Database["public"]["Enums"]["deposit_status"]
           transfer_timestamp: string | null
           user_id: string
         }
         Insert: {
           amount_money: number
+          amount_pkr?: number | null
+          amount_zc?: number | null
           approved_credits?: number | null
           bank_sender_name: string
           created_at?: string
           currency?: string
           id?: string
           notes?: string | null
+          proof_url?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           screenshot_url?: string | null
           sender_account_no: string
           sender_bank: string
+          sender_name?: string | null
           status?: Database["public"]["Enums"]["deposit_status"]
           transfer_timestamp?: string | null
           user_id: string
         }
         Update: {
           amount_money?: number
+          amount_pkr?: number | null
+          amount_zc?: number | null
           approved_credits?: number | null
           bank_sender_name?: string
           created_at?: string
           currency?: string
           id?: string
           notes?: string | null
+          proof_url?: string | null
           rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           screenshot_url?: string | null
           sender_account_no?: string
           sender_bank?: string
+          sender_name?: string | null
           status?: Database["public"]["Enums"]["deposit_status"]
           transfer_timestamp?: string | null
           user_id?: string
