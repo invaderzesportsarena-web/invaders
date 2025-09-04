@@ -463,12 +463,11 @@ export default function AdminWalletRequests() {
                                             placeholder="Enter Z-Credits amount"
                                             className="rounded-xl mt-2 text-lg font-medium"
                                           />
+                                          <p className="text-xs text-text-muted mt-1">
+                                            Suggested: {Math.round(selectedRequest.amount_money / VALIDATION.EXCHANGE_RATE * 100) / 100} Z-Credits
+                                          </p>
                                         </div>
                                       </div>
-                                       <p className="text-xs text-text-muted">
-                                         Suggested: {Math.round(selectedRequest.amount_money / VALIDATION.EXCHANGE_RATE * 100) / 100} Z-Credits
-                                       </p>
-                                     </div>
 
                                       <div className="space-y-2">
                                         <Label htmlFor="reason">Rejection Reason (if rejecting)</Label>
