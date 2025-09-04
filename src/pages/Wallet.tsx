@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Wallet as WalletIcon, Plus, Minus, TrendingUp, TrendingDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/Header";
 
 interface Transaction {
   id: string;
@@ -43,16 +44,23 @@ export default function Wallet() {
 
   const fetchBalance = async (userId: string) => {
     try {
+      // First try to get existing balance
       const { data, error } = await supabase
         .from('zcred_balances')
         .select('balance')
         .eq('user_id', userId)
         .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching balance:', error.message);
+        setBalance(0);
+        return;
+      }
+      
       setBalance(data?.balance || 0);
     } catch (error: any) {
       console.error('Error fetching balance:', error.message);
+      setBalance(0);
     }
   };
 
@@ -98,25 +106,33 @@ export default function Wallet() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-card rounded w-1/4"></div>
-          <div className="h-48 bg-card rounded"></div>
-          <div className="h-64 bg-card rounded"></div>
+      <div className="min-h-screen">
+        <Header />
+        <div className="container mx-auto py-8 px-4">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-secondary/50 rounded w-1/4"></div>
+            <div className="h-48 bg-secondary/50 rounded"></div>
+            <div className="h-64 bg-secondary/50 rounded"></div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-4xl font-bold text-text-primary">
-          <span className="bg-gradient-accent bg-clip-text text-transparent">
-            My Wallet
-          </span>
-        </h1>
-      </div>
+    <div className="min-h-screen">
+      <Header />
+      <div className="container mx-auto py-8 px-4 space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-4xl font-heading font-bold text-text-primary">
+            <span className="bg-gradient-accent bg-clip-text text-transparent">
+              My Wallet
+            </span>
+            <div className="text-lg font-normal text-text-secondary mt-2">
+              1 Z-Cred = 90 PKR
+            </div>
+          </h1>
+        </div>
 
       {/* Balance Card */}
       <Card className="esports-card">
@@ -127,33 +143,48 @@ export default function Wallet() {
                 <WalletIcon className="w-6 h-6 text-white" />
               </div>
               <div>
-                <CardTitle className="text-text-primary">Current Balance</CardTitle>
+                <CardTitle className="text-text-primary text-xl">Current Balance</CardTitle>
                 <CardDescription className="text-text-secondary">
-                  Available Z-Credits
+                  Available Z-Credits • Min deposit: 2 ZC • Min withdrawal: 3 ZC
                 </CardDescription>
               </div>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-bold text-primary">
+              <div className="text-4xl font-heading font-bold text-primary">
                 {balance.toLocaleString()} ZC
+              </div>
+              <div className="text-sm text-text-secondary">
+                ≈ {(balance * 90).toLocaleString()} PKR
               </div>
             </div>
           </div>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="flex gap-4">
-            <Button asChild variant="esports" className="flex-1">
+            <Button asChild className="bg-gradient-accent hover:shadow-[var(--shadow-glow)] flex-1 font-bold">
               <Link to="/wallet/deposit">
                 <Plus className="w-4 h-4 mr-2" />
                 Deposit Z-Creds
               </Link>
             </Button>
-            <Button asChild variant="outline" className="flex-1">
+            <Button asChild variant="outline" className="flex-1 font-bold border-2">
               <Link to="/wallet/withdraw">
                 <Minus className="w-4 h-4 mr-2" />
                 Withdraw Z-Creds
               </Link>
             </Button>
+          </div>
+          <div className="mt-4 p-4 bg-secondary/20 rounded-xl">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-text-secondary">Withdrawal Fee:</span>
+                <span className="text-text-primary font-bold ml-2">0.1 ZC</span>
+              </div>
+              <div>
+                <span className="text-text-secondary">Processing:</span>
+                <span className="text-text-primary font-bold ml-2">Manual Review</span>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -219,7 +250,8 @@ export default function Wallet() {
             </div>
           )}
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }

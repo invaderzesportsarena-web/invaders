@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, Package } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/Header";
 
 interface Product {
   id: string;
@@ -131,23 +132,28 @@ export default function Shop() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen">
+      <Header />
+      <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-text-primary mb-4">
+        <h1 className="text-4xl font-heading font-bold text-text-primary mb-4">
           Z-Credits <span className="bg-gradient-accent bg-clip-text text-transparent">Shop</span>
         </h1>
         <div className="flex items-center justify-between">
           <p className="text-xl text-text-secondary">
-            Redeem your hard-earned credits for exclusive rewards
+            Redeem your Z-Credits for exclusive rewards • Prices include PKR conversion
           </p>
           {user && (
             <div className="flex items-center gap-2 bg-card border border-border rounded-2xl px-4 py-2">
@@ -184,9 +190,14 @@ export default function Shop() {
                   <Badge variant="outline" className="text-xs">
                     {product.stock} in stock
                   </Badge>
-                  <div className="flex items-center gap-1 text-primary font-bold">
-                    <span className="w-4 h-4 text-center text-sm">Z</span>
-                    <span>{product.price_credits}</span>
+                  <div className="flex flex-col items-end">
+                    <div className="flex items-center gap-1 text-primary font-bold text-lg">
+                      <span className="w-4 h-4 text-center text-sm">Z</span>
+                      <span>{product.price_credits}</span>
+                    </div>
+                    <div className="text-xs text-text-secondary">
+                      ≈ {(product.price_credits * 90).toLocaleString()} PKR
+                    </div>
                   </div>
                 </div>
                 <CardTitle className="text-lg text-text-primary line-clamp-2">
@@ -200,19 +211,19 @@ export default function Shop() {
                   </p>
                 )}
                 <Button 
-                  variant="esports" 
-                  className="w-full"
+                  className="w-full bg-gradient-accent hover:shadow-[var(--shadow-glow)] font-bold"
                   onClick={() => handleRedeem(product)}
                   disabled={!user || balance < product.price_credits}
                 >
                   <ShoppingBag className="w-4 h-4 mr-2" />
-                  {!user ? "Sign In to Redeem" : "Redeem with Z-Credits"}
+                  {!user ? "Sign In to Redeem" : balance < product.price_credits ? "Insufficient Z-Creds" : "Order Now"}
                 </Button>
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

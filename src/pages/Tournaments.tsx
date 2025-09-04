@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Trophy, Download, ExternalLink, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/Header";
 
 interface Tournament {
   id: string;
@@ -348,27 +349,32 @@ export default function Tournaments() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="animate-pulse space-y-6">
-          <div className="h-8 bg-card rounded w-1/3"></div>
-          <div className="h-64 bg-card rounded"></div>
+      <div className="min-h-screen">
+        <Header />
+        <div className="container mx-auto py-8 px-4">
+          <div className="animate-pulse space-y-6">
+            <div className="h-8 bg-secondary/50 rounded w-1/3"></div>
+            <div className="h-64 bg-secondary/50 rounded"></div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-text-primary mb-2">
-          <span className="bg-gradient-accent bg-clip-text text-transparent">
-            Tournaments
-          </span>
-        </h1>
-        <p className="text-text-secondary text-lg">
-          Compete in epic tournaments and prove your skills against the best players.
-        </p>
-      </div>
+    <div className="min-h-screen">
+      <Header />
+      <div className="container mx-auto py-8 px-4">
+        <div className="mb-8">
+          <h1 className="text-4xl font-heading font-bold text-text-primary mb-2">
+            <span className="bg-gradient-accent bg-clip-text text-transparent">
+              Tournaments
+            </span>
+          </h1>
+          <p className="text-text-secondary text-lg">
+            Compete in epic tournaments and prove your skills against the best players.
+          </p>
+        </div>
 
       <Tabs defaultValue="live" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
@@ -452,6 +458,7 @@ export default function Tournaments() {
           )}
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }
