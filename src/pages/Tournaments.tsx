@@ -292,13 +292,20 @@ export default function Tournaments() {
         )}
 
         <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+          <Button 
+            variant="outline"
+            className="flex-[2]"
+            onClick={() => navigate(`/tournaments/${tournament.id}`)}
+          >
+            View Detail
+          </Button>
           {showRegisterButton && !hasUserRegistered(tournament.id) && (
             <Button 
               variant="default"
               className="flex-1 bg-primary hover:bg-primary/90"
               onClick={() => navigate(`/tournaments/${tournament.id}/register`)}
             >
-              Register Team
+              Register Now
             </Button>
           )}
 
