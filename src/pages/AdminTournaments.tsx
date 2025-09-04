@@ -44,6 +44,13 @@ interface TournamentFormData {
   slots: number;
   state: "draft" | "registration_open" | "locked" | "in_progress" | "completed";
   cover_url: string;
+  prizes: Prize[];
+}
+
+interface Prize {
+  rank: number;
+  amount_zcred: number;
+  note?: string;
 }
 
 const initialFormData: TournamentFormData = {
@@ -56,7 +63,8 @@ const initialFormData: TournamentFormData = {
   entry_fee_credits: 0,
   slots: 0,
   state: "registration_open",
-  cover_url: ""
+  cover_url: "",
+  prizes: []
 };
 
 const stateColors = {
@@ -145,6 +153,8 @@ export default function AdminTournaments() {
         state: formData.state as "draft" | "registration_open" | "locked" | "in_progress" | "completed"
       };
 
+      let tournamentId = editingId;
+      
       if (editingId) {
         const { error } = await supabase
           .from('tournaments')
@@ -158,16 +168,40 @@ export default function AdminTournaments() {
           description: "Tournament updated successfully"
         });
       } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('tournaments')
-          .insert(payload);
+          .insert(payload)
+          .select('id')
+          .single();
 
         if (error) throw error;
+        tournamentId = data.id;
         
         toast({
           title: "Success",
           description: "Tournament created successfully"
         });
+      }
+
+      // Save prizes using the upsert_prize function
+      if (formData.prizes.length > 0 && tournamentId) {
+        for (const prize of formData.prizes) {
+          const { error: prizeError } = await supabase.rpc('upsert_prize', {
+            p_tournament_id: tournamentId,
+            p_rank: prize.rank,
+            p_amount: prize.amount_zcred,
+            p_note: prize.note || null
+          });
+          
+          if (prizeError) {
+            console.error('Error saving prize:', prizeError);
+            toast({
+              title: "Warning",
+              description: `Failed to save prize for rank ${prize.rank}`,
+              variant: "destructive"
+            });
+          }
+        }
       }
 
       setDialogOpen(false);
@@ -187,7 +221,14 @@ export default function AdminTournaments() {
     }
   };
 
-  const handleEdit = (tournament: Tournament) => {
+  const handleEdit = async (tournament: Tournament) => {
+    // Fetch existing prizes for this tournament
+    const { data: prizes } = await supabase
+      .from('tournament_prizes')
+      .select('*')
+      .eq('tournament_id', tournament.id)
+      .order('rank');
+
     setFormData({
       title: tournament.title,
       game: tournament.game || "",
@@ -198,7 +239,12 @@ export default function AdminTournaments() {
       entry_fee_credits: tournament.entry_fee_credits,
       slots: tournament.slots || 0,
       state: tournament.state as "draft" | "registration_open" | "locked" | "in_progress" | "completed",
-      cover_url: tournament.cover_url || ""
+      cover_url: tournament.cover_url || "",
+      prizes: prizes?.map(p => ({
+        rank: p.rank,
+        amount_zcred: p.amount_zcred,
+        note: p.note || ""
+      })) || []
     });
     setEditingId(tournament.id);
     setDialogOpen(true);
@@ -410,7 +456,7 @@ export default function AdminTournaments() {
                   </div>
                 </div>
                 
-                {/* Cover Image Upload */}
+                 {/* Cover Image Upload */}
                 <div>
                   <Label htmlFor="cover">Cover Image</Label>
                   <Input
@@ -427,6 +473,94 @@ export default function AdminTournaments() {
                         className="w-32 h-20 object-cover rounded border"
                       />
                       <p className="text-sm text-muted-foreground mt-1">Current cover image</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Prize Management */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <Label>Prize Pool (Z-Credits)</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const newPrize = { rank: formData.prizes.length + 1, amount_zcred: 0, note: "" };
+                        setFormData({ ...formData, prizes: [...formData.prizes, newPrize] });
+                      }}
+                    >
+                      <Plus className="w-3 h-3 mr-1" />
+                      Add Prize
+                    </Button>
+                  </div>
+                  
+                  {formData.prizes.length === 0 ? (
+                    <p className="text-sm text-muted-foreground border border-dashed rounded-lg p-4 text-center">
+                      No prizes set. Click "Add Prize" to add prize tiers.
+                    </p>
+                  ) : (
+                    <div className="space-y-2 max-h-32 overflow-y-auto border rounded-lg p-2">
+                      {formData.prizes.map((prize, index) => (
+                        <div key={index} className="grid grid-cols-12 gap-2 items-center">
+                          <div className="col-span-2">
+                            <Label className="text-xs">Rank</Label>
+                            <Input
+                              type="number"
+                              min="1"
+                              value={prize.rank}
+                              onChange={(e) => {
+                                const newPrizes = [...formData.prizes];
+                                newPrizes[index].rank = parseInt(e.target.value) || 1;
+                                setFormData({ ...formData, prizes: newPrizes });
+                              }}
+                              className="h-8 text-xs"
+                            />
+                          </div>
+                          <div className="col-span-3">
+                            <Label className="text-xs">Amount (ZC)</Label>
+                            <Input
+                              type="number"
+                              min="0"
+                              value={prize.amount_zcred}
+                              onChange={(e) => {
+                                const newPrizes = [...formData.prizes];
+                                newPrizes[index].amount_zcred = parseInt(e.target.value) || 0;
+                                setFormData({ ...formData, prizes: newPrizes });
+                              }}
+                              className="h-8 text-xs"
+                              placeholder="0"
+                            />
+                          </div>
+                          <div className="col-span-5">
+                            <Label className="text-xs">Note (optional)</Label>
+                            <Input
+                              value={prize.note || ""}
+                              onChange={(e) => {
+                                const newPrizes = [...formData.prizes];
+                                newPrizes[index].note = e.target.value;
+                                setFormData({ ...formData, prizes: newPrizes });
+                              }}
+                              className="h-8 text-xs"
+                              placeholder="e.g., Champion"
+                            />
+                          </div>
+                          <div className="col-span-2 flex justify-end">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                const newPrizes = formData.prizes.filter((_, i) => i !== index);
+                                setFormData({ ...formData, prizes: newPrizes });
+                              }}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
