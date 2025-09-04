@@ -442,32 +442,41 @@ export default function AdminWalletRequests() {
                                       </div>
                                     )}
 
-                                    <div className="space-y-4">
-                                      <div className="bg-primary/10 rounded-xl p-4 space-y-3">
-                                        <div className="text-center">
-                                          <p className="text-text-secondary text-sm">Deposit Amount</p>
-                                          <p className="text-2xl font-bold text-text-primary">
-                                            {selectedRequest.amount_money.toFixed(2)} {selectedRequest.currency}
-                                          </p>
-                                        </div>
-                                        <div className="border-t border-border pt-3">
-                                          <Label htmlFor="credits" className="text-base font-medium">Z-Credits to Grant</Label>
-                                          <Input
-                                            id="credits"
-                                            type="number"
-                                            step="0.01"
-                                            min="0"
-                                            inputMode="decimal"
-                                            value={actionForm.credits}
-                                            onChange={(e) => setActionForm(prev => ({ ...prev, credits: e.target.value }))}
-                                            placeholder="Enter Z-Credits amount"
-                                            className="rounded-xl mt-2 text-lg font-medium"
-                                          />
-                                          <p className="text-xs text-text-muted mt-1">
-                                            Suggested: {Math.round(selectedRequest.amount_money / VALIDATION.EXCHANGE_RATE * 100) / 100} Z-Credits
-                                          </p>
-                                        </div>
-                                      </div>
+                                     <div className="space-y-4">
+                                       <div className="bg-primary/10 rounded-xl p-4 space-y-3">
+                                         <div className="text-center">
+                                           <p className="text-text-secondary text-sm">Deposit Amount</p>
+                                           <p className="text-2xl font-bold text-text-primary">
+                                             {selectedRequest.amount_money.toFixed(2)} {selectedRequest.currency}
+                                           </p>
+                                         </div>
+                                         <div className="border-t border-border pt-3">
+                                           <Label htmlFor="credits" className="text-base font-medium text-center block mb-2">
+                                             🎯 Admin: Enter Custom Z-Credits Amount
+                                           </Label>
+                                           <div className="bg-background rounded-lg p-3 border-2 border-primary/20">
+                                             <Input
+                                               id="credits"
+                                               type="number"
+                                               step="0.01"
+                                               min="0"
+                                               inputMode="decimal"
+                                               value={actionForm.credits}
+                                               onChange={(e) => setActionForm(prev => ({ ...prev, credits: e.target.value }))}
+                                               placeholder="Enter exact Z-Credits to add to wallet"
+                                               className="rounded-xl text-xl font-bold text-center border-primary/30 focus:border-primary"
+                                             />
+                                             <div className="flex justify-between mt-2 text-xs">
+                                               <span className="text-text-muted">
+                                                 Suggested: {Math.round(selectedRequest.amount_money / VALIDATION.EXCHANGE_RATE * 100) / 100} Z-Credits
+                                               </span>
+                                               <span className="text-primary font-medium">
+                                                 Rate: 1 PKR = {(1/VALIDATION.EXCHANGE_RATE).toFixed(2)} Z-Cred
+                                               </span>
+                                             </div>
+                                           </div>
+                                         </div>
+                                       </div>
 
                                       <div className="space-y-2">
                                         <Label htmlFor="reason">Rejection Reason (if rejecting)</Label>
