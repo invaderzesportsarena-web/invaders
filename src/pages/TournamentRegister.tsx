@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Trophy, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { formatZcredDisplay } from "@/utils/formatZcreds";
 
 interface Tournament {
   id: string;
@@ -104,21 +105,26 @@ export default function TournamentRegister() {
     setSubmitting(true);
 
     try {
-      const { error } = await supabase
-        .from('registrations')
-        .insert({
-          tournament_id: tournament.id,
-          captain_id: user.id,
-          team_name: formData.team_name,
-          contact_phone: formData.contact_phone,
-          whatsapp_number: formData.whatsapp_number
-        });
+      // Use the register_for_tournament function which handles balance validation
+      const { error } = await supabase.rpc('register_for_tournament', {
+        p_tournament_id: tournament.id,
+        p_team_name: formData.team_name,
+        p_entry_fee: tournament.entry_fee_credits
+      });
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific error messages
+        if (error.message.includes('Insufficient Z-Creds')) {
+          throw new Error('Not sufficient Z-Credits, kindly deposit more funds to your wallet');
+        } else if (error.message.includes('Complete your profile')) {
+          throw new Error('Please complete your profile (username, in-game name, WhatsApp) before registering');
+        }
+        throw error;
+      }
 
       toast({
-        title: "Registration Submitted!",
-        description: "Your registration is pending approval. You'll be notified once it's reviewed.",
+        title: "Registration Successful!",
+        description: `Team "${formData.team_name}" has been registered successfully. Entry fee of ${tournament.entry_fee_credits} Z-Credits has been deducted.`,
       });
 
       navigate(`/tournaments/${tournament.id}`);
@@ -244,7 +250,7 @@ export default function TournamentRegister() {
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
                   <span className="text-text-secondary">Entry Fee:</span>
-                  <span className="text-text-primary">{tournament.entry_fee_credits} Z-Credits</span>
+                  <span className="text-text-primary font-semibold">{formatZcredDisplay(tournament.entry_fee_credits)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-text-secondary">Tournament Start:</span>
