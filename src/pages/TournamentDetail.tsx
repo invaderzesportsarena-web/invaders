@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Trophy, Eye } from "lucide-react";
+import { Calendar, Trophy, Eye, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -30,6 +30,7 @@ interface ResultMedia {
 
 export default function TournamentDetail() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [results, setResults] = useState<ResultMedia[]>([]);
   const [loading, setLoading] = useState(true);
@@ -156,6 +157,14 @@ export default function TournamentDetail() {
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-6">
+      {/* Back Navigation */}
+      <div className="mb-6">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center space-x-2">
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back</span>
+        </Button>
+      </div>
+
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
