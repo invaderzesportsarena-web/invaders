@@ -25,6 +25,7 @@ import AdminProducts from "./pages/AdminProducts";
 import AdminResults from "./pages/AdminResults";
 import AdminSettings from "./pages/AdminSettings";
 import AdminTournaments from "./pages/AdminTournaments";
+import BackgroundRemoval from "./pages/BackgroundRemoval";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,7 @@ const App = () => (
             <Route path="/wallet" element={<Wallet />} />
             <Route path="/wallet/deposit" element={<WalletDeposit />} />
             <Route path="/wallet/withdraw" element={<WalletWithdraw />} />
+            <Route path="/background-removal" element={<BackgroundRemoval />} />
             
             {/* Admin Routes - Protected */}
           <Route path="/admin" element={<Admin />} />
