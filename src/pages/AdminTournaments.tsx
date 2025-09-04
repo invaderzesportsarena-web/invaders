@@ -143,8 +143,11 @@ export default function AdminTournaments() {
         cover_url = publicUrl;
       }
       
-      const payload = {
-        ...formData,
+      // Create tournament payload without prizes field
+      const tournamentPayload = {
+        title: formData.title,
+        game: formData.game,
+        rules_md: formData.rules_md,
         cover_url,
         entry_fee_credits: parseZcreds(formData.entry_fee_credits),
         slots: parseInt(formData.slots.toString()) || null,
@@ -159,7 +162,7 @@ export default function AdminTournaments() {
       if (editingId) {
         const { error } = await supabase
           .from('tournaments')
-          .update(payload)
+          .update(tournamentPayload)
           .eq('id', editingId);
 
         if (error) throw error;
@@ -171,7 +174,7 @@ export default function AdminTournaments() {
       } else {
         const { data, error } = await supabase
           .from('tournaments')
-          .insert(payload)
+          .insert(tournamentPayload)
           .select('id')
           .single();
 
