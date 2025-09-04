@@ -526,11 +526,15 @@ export type Database = {
       zcred_deposit_forms: {
         Row: {
           amount_money: number
+          approved_credits: number | null
           bank_sender_name: string
           created_at: string
           currency: string
           id: string
           notes: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           screenshot_url: string | null
           sender_account_no: string
           sender_bank: string
@@ -540,11 +544,15 @@ export type Database = {
         }
         Insert: {
           amount_money: number
+          approved_credits?: number | null
           bank_sender_name: string
           created_at?: string
           currency?: string
           id?: string
           notes?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           screenshot_url?: string | null
           sender_account_no: string
           sender_bank: string
@@ -554,11 +562,15 @@ export type Database = {
         }
         Update: {
           amount_money?: number
+          approved_credits?: number | null
           bank_sender_name?: string
           created_at?: string
           currency?: string
           id?: string
           notes?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           screenshot_url?: string | null
           sender_account_no?: string
           sender_bank?: string
@@ -643,6 +655,7 @@ export type Database = {
       zcred_withdrawal_forms: {
         Row: {
           amount_zcreds: number
+          approved_credits: number | null
           created_at: string
           iban_optional: string | null
           id: string
@@ -650,11 +663,15 @@ export type Database = {
           recipient_account_no: string
           recipient_bank: string
           recipient_name: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
           status: Database["public"]["Enums"]["withdrawal_status"]
           user_id: string
         }
         Insert: {
           amount_zcreds: number
+          approved_credits?: number | null
           created_at?: string
           iban_optional?: string | null
           id?: string
@@ -662,11 +679,15 @@ export type Database = {
           recipient_account_no: string
           recipient_bank: string
           recipient_name: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["withdrawal_status"]
           user_id: string
         }
         Update: {
           amount_zcreds?: number
+          approved_credits?: number | null
           created_at?: string
           iban_optional?: string | null
           id?: string
@@ -674,6 +695,9 @@ export type Database = {
           recipient_account_no?: string
           recipient_bank?: string
           recipient_name?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           status?: Database["public"]["Enums"]["withdrawal_status"]
           user_id?: string
         }
