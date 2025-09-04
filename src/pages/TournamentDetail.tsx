@@ -7,6 +7,7 @@ import { Calendar, Trophy, Eye, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { formatInTimeZone } from "date-fns-tz";
 
 interface Tournament {
   id: string;
@@ -93,14 +94,11 @@ export default function TournamentDetail() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return formatInTimeZone(
+      new Date(dateString), 
+      'Asia/Karachi', 
+      'EEEE, MMMM d, yyyy h:mm a'
+    ) + ' (Karachi Time)';
   };
 
   const getStateColor = (state: string) => {

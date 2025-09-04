@@ -8,6 +8,7 @@ import { Calendar, Clock, Trophy, Download, ExternalLink, Users, ArrowLeft } fro
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
+import { formatInTimeZone } from "date-fns-tz";
 
 interface Tournament {
   id: string;
@@ -106,12 +107,11 @@ export default function Tournaments() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return formatInTimeZone(
+      new Date(dateString), 
+      'Asia/Karachi', 
+      'MMM d, h:mm a'
+    );
   };
 
   const formatCountdown = (dateString: string) => {
@@ -127,7 +127,7 @@ export default function Tournaments() {
     if (hours < 24) {
       return `Closes in ${hours}h ${minutes}m`;
     } else {
-      return `Closes ${formatDate(dateString)}`;
+      return `Closes ${formatDate(dateString)} (Karachi Time)`;
     }
   };
 

@@ -15,6 +15,7 @@ import { Plus, Edit, Trash2, Lock, Play, CheckCircle, ArrowLeft } from "lucide-r
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
 
 interface Tournament {
   id: string;
@@ -339,36 +340,36 @@ export default function AdminTournaments() {
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="reg_starts_at">Registration Starts At</Label>
-                    <Input
-                      id="reg_starts_at"
-                      type="datetime-local"
-                      value={formData.reg_starts_at}
-                      onChange={(e) => setFormData({ ...formData, reg_starts_at: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="reg_closes_at">Registration Closes At</Label>
-                    <Input
-                      id="reg_closes_at"
-                      type="datetime-local"
-                      value={formData.reg_closes_at}
-                      onChange={(e) => setFormData({ ...formData, reg_closes_at: e.target.value })}
-                    />
-                  </div>
+                    <div>
+                      <Label htmlFor="reg_starts_at">Registration Starts At (Karachi Time)</Label>
+                      <Input
+                        id="reg_starts_at"
+                        type="datetime-local"
+                        value={formData.reg_starts_at}
+                        onChange={(e) => setFormData({ ...formData, reg_starts_at: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="reg_closes_at">Registration Closes At (Karachi Time)</Label>
+                      <Input
+                        id="reg_closes_at"
+                        type="datetime-local"
+                        value={formData.reg_closes_at}
+                        onChange={(e) => setFormData({ ...formData, reg_closes_at: e.target.value })}
+                      />
+                    </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="starts_at">Tournament Starts At</Label>
-                    <Input
-                      id="starts_at"
-                      type="datetime-local"
-                      value={formData.starts_at}
-                      onChange={(e) => setFormData({ ...formData, starts_at: e.target.value })}
-                    />
-                  </div>
+                    <div>
+                      <Label htmlFor="starts_at">Tournament Starts At (Karachi Time)</Label>
+                      <Input
+                        id="starts_at"
+                        type="datetime-local"
+                        value={formData.starts_at}
+                        onChange={(e) => setFormData({ ...formData, starts_at: e.target.value })}
+                      />
+                    </div>
                   <div>
                     <Label htmlFor="slots">Total Slots</Label>
                     <Input
@@ -488,16 +489,16 @@ export default function AdminTournaments() {
                         </TableCell>
                         <TableCell>{tournament.slots || "-"}</TableCell>
                         <TableCell>
-                          {tournament.reg_starts_at ? format(new Date(tournament.reg_starts_at), "MMM dd, HH:mm") : "-"}
+                          {tournament.reg_starts_at ? formatInTimeZone(new Date(tournament.reg_starts_at), 'Asia/Karachi', 'MMM dd, h:mm a') : "-"}
                         </TableCell>
                         <TableCell>
-                          {tournament.reg_closes_at ? format(new Date(tournament.reg_closes_at), "MMM dd, HH:mm") : "-"}
+                          {tournament.reg_closes_at ? formatInTimeZone(new Date(tournament.reg_closes_at), 'Asia/Karachi', 'MMM dd, h:mm a') : "-"}
                         </TableCell>
                         <TableCell>
-                          {tournament.starts_at ? format(new Date(tournament.starts_at), "MMM dd, HH:mm") : "-"}
+                          {tournament.starts_at ? formatInTimeZone(new Date(tournament.starts_at), 'Asia/Karachi', 'MMM dd, h:mm a') : "-"}
                         </TableCell>
                         <TableCell>{tournament.entry_fee_credits} ZC</TableCell>
-                        <TableCell>{format(new Date(tournament.created_at), "MMM dd, HH:mm")}</TableCell>
+                        <TableCell>{formatInTimeZone(new Date(tournament.created_at), 'Asia/Karachi', 'MMM dd, h:mm a')}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end space-x-2">
                             {tournament.state === 'registration_open' && (
