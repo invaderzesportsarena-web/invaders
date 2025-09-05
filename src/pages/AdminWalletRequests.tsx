@@ -369,6 +369,7 @@ export default function AdminWalletRequests() {
                                     </Button>
                                   </DialogTrigger>
                                   <DialogContent className="sm:max-w-[425px] bg-background border-border">
+                                    {/* FORCE REFRESH v2.0 - NEW MANUAL INPUT DIALOG */}
                                     <DialogHeader className="text-center">
                                       <DialogTitle className="text-xl font-bold text-text-primary">Verify Deposit</DialogTitle>
                                       <DialogDescription className="text-lg font-semibold text-text-primary mt-2">
