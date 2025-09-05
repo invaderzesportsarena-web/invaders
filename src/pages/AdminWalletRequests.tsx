@@ -455,14 +455,82 @@ export default function AdminWalletRequests() {
                             </div>
                           </div>
                           
-                          <div className="flex gap-2 ml-4">
-                            <Sheet>
-                              <SheetTrigger asChild>
-                                <Button size="sm" variant="outline" onClick={() => setSelectedRequest(deposit)}>
-                                  <Eye className="w-4 h-4 mr-1" />
-                                  Details
-                                </Button>
-                              </SheetTrigger>
+                           <div className="flex gap-2 ml-4">
+                             <Dialog>
+                               <DialogTrigger asChild>
+                                 <Button size="sm" onClick={() => setSelectedRequest(deposit)}>
+                                   <Check className="w-4 h-4 mr-1" />
+                                   Verify
+                                 </Button>
+                               </DialogTrigger>
+                               <DialogContent className="sm:max-w-[425px] bg-background border-border">
+                                 <DialogHeader className="text-center">
+                                   <DialogTitle className="text-xl font-bold text-text-primary">Verify Deposit</DialogTitle>
+                                   <DialogDescription className="text-lg font-semibold text-text-primary mt-2">
+                                     HOW MANY Z CRED U WANT TO DEPOSIT
+                                   </DialogDescription>
+                                 </DialogHeader>
+                                 
+                                 <div className="space-y-6 py-6">
+                                   <div className="space-y-2">
+                                     <Label className="text-sm font-medium text-text-secondary uppercase tracking-wide">
+                                       RECEIVED PKR
+                                     </Label>
+                                     <div className="text-2xl font-bold text-text-primary">
+                                       {deposit.amount_money.toFixed(2)} PKR
+                                     </div>
+                                   </div>
+                                   
+                                   <div className="space-y-2">
+                                     <Label htmlFor="credits" className="text-sm font-medium text-text-secondary uppercase tracking-wide">
+                                       DEPOSIT Z CRED
+                                     </Label>
+                                     <Input
+                                       id="credits"
+                                       type="text"
+                                       placeholder="100 Z.C"
+                                       value={actionForm.credits}
+                                       onChange={(e) => setActionForm(prev => ({ ...prev, credits: e.target.value }))}
+                                       className="text-2xl font-bold h-14 text-center border-2"
+                                     />
+                                   </div>
+                                   
+                                   <div className="text-xs text-text-muted text-center">
+                                     Are you sure you want to verify this deposit of {actionForm.credits || '0'} Z-Credits?<br />
+                                     Credit to the user.
+                                   </div>
+                                 </div>
+                                 
+                                 <DialogFooter className="flex gap-4">
+                                   <Button
+                                     variant="outline"
+                                     size="lg"
+                                     className="flex-1"
+                                     onClick={() => {
+                                       setSelectedRequest(null);
+                                       setActionForm({ credits: '', reason: '' });
+                                     }}
+                                   >
+                                     Cancel
+                                   </Button>
+                                   <Button 
+                                     size="lg"
+                                     className="flex-1 bg-primary hover:bg-primary/90"
+                                     onClick={() => handleDepositApprove(deposit.id, deposit.user_id)}
+                                   >
+                                     Verify
+                                   </Button>
+                                 </DialogFooter>
+                               </DialogContent>
+                             </Dialog>
+                             
+                             <Sheet>
+                               <SheetTrigger asChild>
+                                 <Button size="sm" variant="outline" onClick={() => setSelectedRequest(deposit)}>
+                                   <Eye className="w-4 h-4 mr-1" />
+                                   Details
+                                 </Button>
+                               </SheetTrigger>
                               <SheetContent className="w-[400px] sm:w-[540px]">
                                 <SheetHeader>
                                   <SheetTitle>Deposit Request Details</SheetTitle>
