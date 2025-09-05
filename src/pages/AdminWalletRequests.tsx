@@ -192,6 +192,7 @@ export default function AdminWalletRequests() {
       setDeposits(prev => prev.filter(d => d.id !== depositId));
       setSelectedRequest(null);
       setActionForm({ credits: '', reason: '' });
+      fetchData(); // Refresh data
 
       toast({
         title: "Success",
@@ -233,6 +234,7 @@ export default function AdminWalletRequests() {
       setDeposits(prev => prev.filter(d => d.id !== depositId));
       setSelectedRequest(null);
       setActionForm({ credits: '', reason: '' });
+      fetchData(); // Refresh data
 
       toast({
         title: "Success",
@@ -243,103 +245,6 @@ export default function AdminWalletRequests() {
       toast({
         title: "Error",
         description: error.message || "Failed to reject deposit",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleWithdrawalApprove = async (withdrawalId: string, userId: string) => {
-    if (!actionForm.credits || !VALIDATION.ZCRED_REGEX.test(actionForm.credits)) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid Z-Credits amount (up to 2 decimal places)",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      const creditsAmount = parseFloat(actionForm.credits);
-      
-      // Insert debit transaction
-      const { error: transError } = await supabase
-        .from(SUPABASE_CONFIG.tables.ZCRED_TRANSACTIONS)
-        .insert({
-          user_id: userId,
-          amount: -creditsAmount,
-          type: 'withdrawal_payout',
-          status: 'approved'
-        });
-
-      if (transError) throw transError;
-
-      // Update withdrawal form status
-      const { error: updateError } = await supabase
-        .from(SUPABASE_CONFIG.tables.ZCRED_WITHDRAWAL_FORMS)
-        .update({ 
-          status: 'paid',
-          approved_credits: creditsAmount,
-          reviewed_by: (await supabase.auth.getUser()).data.user?.id,
-          reviewed_at: new Date().toISOString()
-        })
-        .eq(SUPABASE_CONFIG.columns.zcred_withdrawal_forms.ID, withdrawalId);
-
-      if (updateError) throw updateError;
-
-      setWithdrawals(prev => prev.filter(w => w.id !== withdrawalId));
-      setSelectedRequest(null);
-      setActionForm({ credits: '', reason: '' });
-
-      toast({
-        title: "Success",
-        description: "Withdrawal approved and Z-Creds debited.",
-      });
-    } catch (error: any) {
-      console.error('Error approving withdrawal:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to approve withdrawal",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const handleWithdrawalReject = async (withdrawalId: string) => {
-    if (!actionForm.reason.trim()) {
-      toast({
-        title: "Error",
-        description: "Please provide a rejection reason",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from(SUPABASE_CONFIG.tables.ZCRED_WITHDRAWAL_FORMS)
-        .update({ 
-          status: 'rejected',
-          rejection_reason: actionForm.reason,
-          reviewed_by: (await supabase.auth.getUser()).data.user?.id,
-          reviewed_at: new Date().toISOString()
-        })
-        .eq(SUPABASE_CONFIG.columns.zcred_withdrawal_forms.ID, withdrawalId);
-
-      if (error) throw error;
-
-      setWithdrawals(prev => prev.filter(w => w.id !== withdrawalId));
-      setSelectedRequest(null);
-      setActionForm({ credits: '', reason: '' });
-
-      toast({
-        title: "Success",
-        description: "Request rejected.",
-      });
-    } catch (error: any) {
-      console.error('Error rejecting withdrawal:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to reject withdrawal",
         variant: "destructive"
       });
     }
@@ -437,293 +342,100 @@ export default function AdminWalletRequests() {
                     ) : (
                       <div className="space-y-4">
                         {pendingDeposits.map((deposit) => (
-                      <div key={deposit.id} className="bg-secondary/30 rounded-2xl p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
-                            <div>
-                              <span className="font-medium text-text-primary">User:</span> {deposit.profiles?.display_name || deposit.profiles?.username || deposit.user_id}
-                            </div>
-                            <div>
-                              <span className="font-medium text-text-primary">Amount:</span> {deposit.amount_money.toFixed(2)} {deposit.currency}
-                              <div className="text-xs text-text-muted">≈ {formatZcreds(convertPkrToZc(deposit.amount_money, conversionRate))} ZC</div>
-                            </div>
-                            <div>
-                              <span className="font-medium text-text-primary">Bank:</span> {deposit.sender_bank}
-                            </div>
-                            <div>
-                              <span className="font-medium text-text-primary">Date:</span> {formatDate(deposit.created_at)}
-                            </div>
-                          </div>
-                          
-                           <div className="flex gap-2 ml-4">
-                             <Dialog>
-                               <DialogTrigger asChild>
-                                 <Button size="sm" onClick={() => setSelectedRequest(deposit)}>
-                                   <Check className="w-4 h-4 mr-1" />
-                                   Verify
-                                 </Button>
-                               </DialogTrigger>
-                               <DialogContent className="sm:max-w-[425px] bg-background border-border">
-                                 <DialogHeader className="text-center">
-                                   <DialogTitle className="text-xl font-bold text-text-primary">Verify Deposit</DialogTitle>
-                                    <DialogDescription className="text-lg font-semibold text-text-primary mt-2">
-                                      HOW MANY Z CRED U WANT TO DEPOSIT
-                                    </DialogDescription>
-                                 </DialogHeader>
-                                 
-                                 <div className="space-y-6 py-6">
-                                   <div className="space-y-2">
-                                     <Label className="text-sm font-medium text-text-secondary uppercase tracking-wide">
-                                       RECEIVED PKR
-                                     </Label>
-                                     <div className="text-2xl font-bold text-text-primary">
-                                       {deposit.amount_money.toFixed(2)} PKR
-                                     </div>
-                                   </div>
-                                   
-                                   <div className="space-y-2">
-                                     <Label htmlFor="credits" className="text-sm font-medium text-text-secondary uppercase tracking-wide">
-                                       DEPOSIT Z CRED
-                                     </Label>
-                                     <Input
-                                       id="credits"
-                                       type="text"
-                                       placeholder="100 Z.C"
-                                       value={actionForm.credits}
-                                       onChange={(e) => setActionForm(prev => ({ ...prev, credits: e.target.value }))}
-                                       className="text-2xl font-bold h-14 text-center border-2"
-                                     />
-                                   </div>
-                                   
-                                   <div className="text-xs text-text-muted text-center">
-                                     Are you sure you want to verify this deposit of {actionForm.credits || '0'} Z-Credits?<br />
-                                     Credit to the user.
-                                   </div>
-                                 </div>
-                                 
-                                 <DialogFooter className="flex gap-4">
-                                   <Button
-                                     variant="outline"
-                                     size="lg"
-                                     className="flex-1"
-                                     onClick={() => {
-                                       setSelectedRequest(null);
-                                       setActionForm({ credits: '', reason: '' });
-                                     }}
-                                   >
-                                     Cancel
-                                   </Button>
-                                   <Button 
-                                     size="lg"
-                                     className="flex-1 bg-primary hover:bg-primary/90"
-                                     onClick={() => handleDepositApprove(deposit.id, deposit.user_id)}
-                                   >
-                                     Verify
-                                   </Button>
-                                 </DialogFooter>
-                               </DialogContent>
-                             </Dialog>
-                             
-                             <Sheet>
-                               <SheetTrigger asChild>
-                                 <Button size="sm" variant="outline" onClick={() => setSelectedRequest(deposit)}>
-                                   <Eye className="w-4 h-4 mr-1" />
-                                   Details
-                                 </Button>
-                               </SheetTrigger>
-                              <SheetContent className="w-[400px] sm:w-[540px]">
-                                <SheetHeader>
-                                  <SheetTitle>Deposit Request Details</SheetTitle>
-                                  <SheetDescription>
-                                    Review and process this deposit request
-                                  </SheetDescription>
-                                </SheetHeader>
+                          <div key={deposit.id} className="bg-secondary/30 rounded-2xl p-4">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
+                                <div>
+                                  <span className="font-medium text-text-primary">User:</span> {deposit.profiles?.display_name || deposit.profiles?.username || deposit.user_id}
+                                </div>
+                                <div>
+                                  <span className="font-medium text-text-primary">Amount:</span> {deposit.amount_money.toFixed(2)} {deposit.currency}
+                                  <div className="text-xs text-text-muted">≈ {formatZcreds(convertPkrToZc(deposit.amount_money, conversionRate))} ZC</div>
+                                </div>
+                                <div>
+                                  <span className="font-medium text-text-primary">Bank:</span> {deposit.sender_bank}
+                                </div>
+                                <div>
+                                  <span className="font-medium text-text-primary">Date:</span> {formatDate(deposit.created_at)}
+                                </div>
+                              </div>
+                              
+                              <div className="flex gap-2 ml-4">
+                                <Dialog>
+                                  <DialogTrigger asChild>
+                                    <Button size="sm" onClick={() => setSelectedRequest(deposit)}>
+                                      <Check className="w-4 h-4 mr-1" />
+                                      Verify
+                                    </Button>
+                                  </DialogTrigger>
+                                  <DialogContent className="sm:max-w-[425px] bg-background border-border">
+                                    <DialogHeader className="text-center">
+                                      <DialogTitle className="text-xl font-bold text-text-primary">Verify Deposit</DialogTitle>
+                                      <DialogDescription className="text-lg font-semibold text-text-primary mt-2">
+                                        HOW MANY Z CRED U WANT TO DEPOSIT
+                                      </DialogDescription>
+                                    </DialogHeader>
+                                    
+                                    <div className="space-y-6 py-6">
+                                      <div className="space-y-2">
+                                        <Label className="text-sm font-medium text-text-secondary uppercase tracking-wide">
+                                          RECEIVED PKR
+                                        </Label>
+                                        <div className="text-2xl font-bold text-text-primary">
+                                          {deposit.amount_money.toFixed(2)} PKR
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="space-y-2">
+                                        <Label htmlFor="credits" className="text-sm font-medium text-text-secondary uppercase tracking-wide">
+                                          DEPOSIT Z CRED
+                                        </Label>
+                                        <Input
+                                          id="credits"
+                                          type="text"
+                                          placeholder="100 Z.C"
+                                          value={actionForm.credits}
+                                          onChange={(e) => setActionForm(prev => ({ ...prev, credits: e.target.value }))}
+                                          className="text-2xl font-bold h-14 text-center border-2"
+                                        />
+                                      </div>
+                                      
+                                      <div className="text-xs text-text-muted text-center">
+                                        Are you sure you want to verify this deposit of {actionForm.credits || '0'} Z-Credits?<br />
+                                        Credit to the user.
+                                      </div>
+                                    </div>
+                                    
+                                    <DialogFooter className="flex gap-4">
+                                      <Button
+                                        variant="outline"
+                                        size="lg"
+                                        className="flex-1"
+                                        onClick={() => {
+                                          setSelectedRequest(null);
+                                          setActionForm({ credits: '', reason: '' });
+                                        }}
+                                      >
+                                        Cancel
+                                      </Button>
+                                      <Button 
+                                        size="lg"
+                                        className="flex-1 bg-primary hover:bg-primary/90"
+                                        onClick={() => handleDepositApprove(deposit.id, deposit.user_id)}
+                                      >
+                                        Verify
+                                      </Button>
+                                    </DialogFooter>
+                                  </DialogContent>
+                                </Dialog>
                                 
-                                {selectedRequest && (
-                                  <div className="space-y-6 mt-6">
-                                    <div className="space-y-4">
-                                      <div className="flex items-center gap-2">
-                                        <User className="w-4 h-4" />
-                                        <span className="font-medium">User Information</span>
-                                      </div>
-                                      <div className="bg-secondary/50 rounded-xl p-3 space-y-2 text-sm">
-                                        <div><span className="font-medium">Name:</span> {selectedRequest.profiles?.display_name}</div>
-                                        <div><span className="font-medium">Username:</span> {selectedRequest.profiles?.username}</div>
-                                        <div><span className="font-medium">User ID:</span> {selectedRequest.user_id}</div>
-                                      </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                      <span className="font-medium">Transfer Details</span>
-                                      <div className="bg-secondary/50 rounded-xl p-3 space-y-2 text-sm">
-                                        <div><span className="font-medium">Amount:</span> {selectedRequest.amount_money.toFixed(2)} {selectedRequest.currency}</div>
-                                        <div><span className="font-medium">Sender:</span> {selectedRequest.bank_sender_name}</div>
-                                        <div><span className="font-medium">Bank:</span> {selectedRequest.sender_bank}</div>
-                                        <div><span className="font-medium">Account:</span> {selectedRequest.sender_account_no}</div>
-                                        <div><span className="font-medium">Date:</span> {formatDate(selectedRequest.transfer_timestamp)}</div>
-                                        {selectedRequest.notes && (
-                                          <div><span className="font-medium">Notes:</span> {selectedRequest.notes}</div>
-                                        )}
-                                      </div>
-                                    </div>
-
-                                    {selectedRequest.screenshot_url && (
-                                      <div className="space-y-2">
-                                        <span className="font-medium">Proof Screenshot</span>
-                                        <img 
-                                          src={selectedRequest.screenshot_url} 
-                                          alt="Transfer proof" 
-                                          className="w-full rounded-xl border"
-                                        />
-                                      </div>
-                                     )}
-
-                                     <div className="space-y-4">
-                                        <div className="bg-primary/10 rounded-xl p-4 space-y-3">
-                                          <div className="text-center">
-                                            <p className="text-text-secondary text-sm">PKR Amount</p>
-                                            <p className="text-2xl font-bold text-text-primary">
-                                              {selectedRequest.amount_money.toFixed(2)} {selectedRequest.currency}
-                                            </p>
-                                            <p className="text-sm text-text-secondary">
-                                              Auto-calculated: ≈ {formatZcreds(convertPkrToZc(selectedRequest.amount_money, conversionRate))} ZC
-                                            </p>
-                                          </div>
-                                         <div className="border-t border-border pt-3">
-                                           <Label htmlFor="credits" className="text-base font-medium text-center block mb-2">
-                                             Admin: Enter Z-Credits to Grant
-                                           </Label>
-                                           <div className="bg-background rounded-lg p-3 border-2 border-primary/20">
-                                             <Input
-                                               id="credits"
-                                               type="number"
-                                               step="0.01"
-                                               min="0"
-                                               inputMode="decimal"
-                                               value={actionForm.credits}
-                                               onChange={(e) => setActionForm(prev => ({ ...prev, credits: e.target.value }))}
-                                               placeholder="Enter exact Z-Credits to add to wallet"
-                                               className="rounded-xl text-xl font-bold text-center border-primary/30 focus:border-primary"
-                                             />
-                                             <div className="flex justify-between mt-2 text-xs">
-                                               <span className="text-text-muted">
-                                                 Suggested: {Math.round(selectedRequest.amount_money / VALIDATION.EXCHANGE_RATE * 100) / 100} Z-Credits
-                                               </span>
-                                               <span className="text-primary font-medium">
-                                                 Rate: 1 PKR = {(1/VALIDATION.EXCHANGE_RATE).toFixed(2)} Z-Cred
-                                               </span>
-                                             </div>
-                                           </div>
-                                         </div>
-                                       </div>
-
-                                      <div className="space-y-2">
-                                        <Label htmlFor="reason">Rejection Reason (if rejecting)</Label>
-                                        <Textarea
-                                          id="reason"
-                                          value={actionForm.reason}
-                                          onChange={(e) => setActionForm(prev => ({ ...prev, reason: e.target.value }))}
-                                          placeholder="Enter reason for rejection"
-                                          className="rounded-xl"
-                                        />
-                                      </div>
-
-                                      <div className="flex gap-2">
-                                         <Dialog>
-                                           <DialogTrigger asChild>
-                                             <Button className="bg-success hover:bg-success/90 flex-1">
-                                               <Check className="w-4 h-4 mr-1" />
-                                               Approve
-                                             </Button>
-                                           </DialogTrigger>
-                                           <DialogContent className="sm:max-w-[425px] bg-background border-border">
-                                             <DialogHeader className="text-center">
-                                               <DialogTitle className="text-xl font-bold text-text-primary">Verify Deposit</DialogTitle>
-                                               <DialogDescription className="text-lg font-semibold text-text-primary mt-2">
-                                                 HOW MANY Z CRED U WANT TO DEPOSIT
-                                               </DialogDescription>
-                                             </DialogHeader>
-                                             
-                                             <div className="space-y-6 py-6">
-                                               <div className="space-y-2">
-                                                 <Label className="text-sm font-medium text-text-secondary uppercase tracking-wide">
-                                                   RECEIVED PKR
-                                                 </Label>
-                                                 <div className="text-2xl font-bold text-text-primary">
-                                                   {selectedRequest.amount_money.toFixed(2)} PKR
-                                                 </div>
-                                               </div>
-                                               
-                                               <div className="space-y-2">
-                                                 <Label htmlFor="credits" className="text-sm font-medium text-text-secondary uppercase tracking-wide">
-                                                   DEPOSIT Z CRED
-                                                 </Label>
-                                                 <Input
-                                                   id="credits"
-                                                   type="text"
-                                                   placeholder="100 Z.C"
-                                                   value={actionForm.credits}
-                                                   onChange={(e) => setActionForm(prev => ({ ...prev, credits: e.target.value }))}
-                                                   className="text-2xl font-bold h-14 text-center border-2"
-                                                 />
-                                               </div>
-                                               
-                                               <div className="text-xs text-text-muted text-center">
-                                                 Are you sure you want to verify this deposit of {actionForm.credits || '0'} Z-Credits?<br />
-                                                 Credit to the user.
-                                               </div>
-                                             </div>
-                                             
-                                             <DialogFooter className="flex gap-4">
-                                               <Button
-                                                 variant="outline"
-                                                 size="lg"
-                                                 className="flex-1"
-                                               >
-                                                 Cancel
-                                               </Button>
-                                               <Button 
-                                                 size="lg"
-                                                 className="flex-1 bg-primary hover:bg-primary/90"
-                                                 onClick={() => handleDepositApprove(selectedRequest.id, selectedRequest.user_id)}
-                                               >
-                                                 Verify
-                                               </Button>
-                                             </DialogFooter>
-                                           </DialogContent>
-                                         </Dialog>
-
-                                        <Dialog>
-                                          <DialogTrigger asChild>
-                                            <Button variant="destructive" className="flex-1">
-                                              <X className="w-4 h-4 mr-1" />
-                                              Reject
-                                            </Button>
-                                          </DialogTrigger>
-                                          <DialogContent>
-                                            <DialogHeader>
-                                              <DialogTitle>Reject Deposit</DialogTitle>
-                                              <DialogDescription>
-                                                Are you sure you want to reject this deposit request?
-                                              </DialogDescription>
-                                            </DialogHeader>
-                                            <DialogFooter>
-                                              <Button variant="outline">Cancel</Button>
-                                              <Button variant="destructive" onClick={() => handleDepositReject(selectedRequest.id)}>
-                                                Reject
-                                              </Button>
-                                            </DialogFooter>
-                                          </DialogContent>
-                                        </Dialog>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                              </SheetContent>
-                            </Sheet>
+                                <Button size="sm" variant="outline">
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  Details
+                                </Button>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
                         ))}
                       </div>
                     )}
@@ -745,7 +457,6 @@ export default function AdminWalletRequests() {
                                 </div>
                                 <div>
                                   <span className="font-medium text-text-primary">Amount:</span> {deposit.amount_money.toFixed(2)} {deposit.currency}
-                                  <div className="text-xs text-text-muted">≈ {formatZcreds(convertPkrToZc(deposit.amount_money, conversionRate))} ZC</div>
                                 </div>
                                 <div>
                                   <span className="font-medium text-text-primary">Approved:</span> {deposit.approved_credits ? formatZcreds(deposit.approved_credits) + ' ZC' : 'N/A'}
@@ -778,7 +489,6 @@ export default function AdminWalletRequests() {
                                 </div>
                                 <div>
                                   <span className="font-medium text-text-primary">Amount:</span> {deposit.amount_money.toFixed(2)} {deposit.currency}
-                                  <div className="text-xs text-text-muted">≈ {formatZcreds(convertPkrToZc(deposit.amount_money, conversionRate))} ZC</div>
                                 </div>
                                 <div>
                                   <span className="font-medium text-text-primary">Reason:</span> {deposit.rejection_reason || 'No reason provided'}
@@ -798,245 +508,7 @@ export default function AdminWalletRequests() {
               </TabsContent>
               
               <TabsContent value="withdrawals" className="space-y-4">
-                <Tabs defaultValue="pending" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="pending">Pending ({pendingWithdrawals.length})</TabsTrigger>
-                    <TabsTrigger value="approved">Paid ({approvedWithdrawals.length})</TabsTrigger>
-                    <TabsTrigger value="rejected">Rejected ({rejectedWithdrawals.length})</TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="pending" className="space-y-4">
-                    {pendingWithdrawals.length === 0 ? (
-                      <div className="py-12 text-center">
-                        <p className="text-text-secondary">No pending withdrawal requests</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {pendingWithdrawals.map((withdrawal) => (
-                      <div key={withdrawal.id} className="bg-secondary/30 rounded-2xl p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
-                            <div>
-                              <span className="font-medium text-text-primary">User:</span> {withdrawal.profiles?.display_name || withdrawal.profiles?.username}
-                            </div>
-                             <div>
-                               <span className="font-medium text-text-primary">Z-Credits:</span> {formatZcredDisplay(withdrawal.amount_zcreds)}
-                             </div>
-                            <div>
-                              <span className="font-medium text-text-primary">Bank:</span> {withdrawal.recipient_bank}
-                            </div>
-                            <div>
-                              <span className="font-medium text-text-primary">Date:</span> {formatDate(withdrawal.created_at)}
-                            </div>
-                          </div>
-                          
-                          <div className="flex gap-2 ml-4">
-                            <Sheet>
-                              <SheetTrigger asChild>
-                                <Button size="sm" variant="outline" onClick={() => setSelectedRequest(withdrawal)}>
-                                  <Eye className="w-4 h-4 mr-1" />
-                                  Details
-                                </Button>
-                              </SheetTrigger>
-                              <SheetContent className="w-[400px] sm:w-[540px]">
-                                <SheetHeader>
-                                  <SheetTitle>Withdrawal Request Details</SheetTitle>
-                                  <SheetDescription>
-                                    Review and process this withdrawal request
-                                  </SheetDescription>
-                                </SheetHeader>
-                                
-                                {selectedRequest && (
-                                  <div className="space-y-6 mt-6">
-                                    <div className="space-y-4">
-                                      <div className="flex items-center gap-2">
-                                        <User className="w-4 h-4" />
-                                        <span className="font-medium">User Information</span>
-                                      </div>
-                                      <div className="bg-secondary/50 rounded-xl p-3 space-y-2 text-sm">
-                                        <div><span className="font-medium">Name:</span> {selectedRequest.profiles?.display_name}</div>
-                                        <div><span className="font-medium">Username:</span> {selectedRequest.profiles?.username}</div>
-                                        <div><span className="font-medium">User ID:</span> {selectedRequest.user_id}</div>
-                                      </div>
-                                    </div>
-
-                                     <div className="space-y-2">
-                                       <span className="font-medium">Withdrawal Details</span>
-                                       <div className="bg-secondary/50 rounded-xl p-3 space-y-2 text-sm">
-                                         <div><span className="font-medium">Z-Credits:</span> {formatZcredDisplay(selectedRequest.amount_zcreds)}</div>
-                                         <div><span className="font-medium">Recipient:</span> {selectedRequest.recipient_name}</div>
-                                         <div><span className="font-medium">Bank:</span> {selectedRequest.recipient_bank}</div>
-                                         <div><span className="font-medium">Account:</span> {selectedRequest.recipient_account_no}</div>
-                                         {selectedRequest.iban_optional && (
-                                           <div><span className="font-medium">IBAN:</span> {selectedRequest.iban_optional}</div>
-                                         )}
-                                         <div><span className="font-medium">Date:</span> {formatDate(selectedRequest.created_at)}</div>
-                                         {selectedRequest.notes && (
-                                           <div><span className="font-medium">Notes:</span> {selectedRequest.notes}</div>
-                                         )}
-                                       </div>
-                                     </div>
-
-                                     <div className="space-y-4">
-                                       <div className="bg-primary/10 rounded-xl p-4 space-y-3">
-                                         <div className="text-center">
-                                           <p className="text-text-secondary text-sm">Requested Amount</p>
-                                           <p className="text-2xl font-bold text-text-primary">
-                                             {formatZcredDisplay(selectedRequest.amount_zcreds)}
-                                           </p>
-                                         </div>
-                                         <div className="border-t border-border pt-3">
-                                           <Label htmlFor="credits" className="text-base font-medium text-center block mb-2">
-                                             Admin: Enter Z-Credits to Deduct
-                                           </Label>
-                                           <Input
-                                             id="credits"
-                                             type="number"
-                                             step="0.01"
-                                             min="0"
-                                             placeholder="Enter Z-Credits amount"
-                                             value={actionForm.credits}
-                                             onChange={(e) => setActionForm(prev => ({ ...prev, credits: e.target.value }))}
-                                             className="text-center text-lg font-medium"
-                                           />
-                                         </div>
-                                       </div>
-                                       
-                                       <div className="space-y-2">
-                                         <Label htmlFor="reason">Rejection Reason (if rejecting)</Label>
-                                         <Textarea
-                                           id="reason"
-                                           value={actionForm.reason}
-                                           onChange={(e) => setActionForm(prev => ({ ...prev, reason: e.target.value }))}
-                                           placeholder="Enter reason for rejection"
-                                           className="rounded-xl"
-                                         />
-                                       </div>
-
-                                      <div className="flex gap-2">
-                                        <Dialog>
-                                          <DialogTrigger asChild>
-                                            <Button className="bg-success hover:bg-success/90 flex-1">
-                                              <Check className="w-4 h-4 mr-1" />
-                                              Approve
-                                            </Button>
-                                          </DialogTrigger>
-                                          <DialogContent>
-                                            <DialogHeader>
-                                              <DialogTitle>Approve Withdrawal</DialogTitle>
-                                              <DialogDescription>
-                                                Process withdrawal of {formatZcredDisplay(selectedRequest.amount_zcreds)} for {selectedRequest.profiles?.display_name}?
-                                              </DialogDescription>
-                                            </DialogHeader>
-                                            <DialogFooter>
-                                              <Button variant="outline">Cancel</Button>
-                                               <Button onClick={() => handleWithdrawalApprove(selectedRequest.id, selectedRequest.user_id)}>
-                                                 Approve
-                                               </Button>
-                                            </DialogFooter>
-                                          </DialogContent>
-                                        </Dialog>
-
-                                        <Dialog>
-                                          <DialogTrigger asChild>
-                                            <Button variant="destructive" className="flex-1">
-                                              <X className="w-4 h-4 mr-1" />
-                                              Reject
-                                            </Button>
-                                          </DialogTrigger>
-                                          <DialogContent>
-                                            <DialogHeader>
-                                              <DialogTitle>Reject Withdrawal</DialogTitle>
-                                              <DialogDescription>
-                                                Are you sure you want to reject this withdrawal request?
-                                              </DialogDescription>
-                                            </DialogHeader>
-                                            <DialogFooter>
-                                              <Button variant="outline">Cancel</Button>
-                                              <Button variant="destructive" onClick={() => handleWithdrawalReject(selectedRequest.id)}>
-                                                Reject
-                                              </Button>
-                                            </DialogFooter>
-                                          </DialogContent>
-                                        </Dialog>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                              </SheetContent>
-                            </Sheet>
-                          </div>
-                        </div>
-                      </div>
-                        ))}
-                      </div>
-                    )}
-                  </TabsContent>
-
-                  <TabsContent value="approved" className="space-y-4">
-                    {approvedWithdrawals.length === 0 ? (
-                      <div className="py-12 text-center">
-                        <p className="text-text-secondary">No paid withdrawals</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {approvedWithdrawals.map((withdrawal) => (
-                          <div key={withdrawal.id} className="bg-success/10 rounded-2xl p-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
-                                <div>
-                                  <span className="font-medium text-text-primary">User:</span> {withdrawal.profiles?.display_name || withdrawal.profiles?.username}
-                                </div>
-                                <div>
-                                  <span className="font-medium text-text-primary">Requested:</span> {formatZcredDisplay(withdrawal.amount_zcreds)}
-                                </div>
-                                <div>
-                                  <span className="font-medium text-text-primary">Paid:</span> {withdrawal.approved_credits ? formatZcreds(withdrawal.approved_credits) + ' ZC' : 'N/A'}
-                                </div>
-                                <div>
-                                  <span className="font-medium text-text-primary">Date:</span> {formatDate(withdrawal.created_at)}
-                                </div>
-                              </div>
-                              <Badge variant="default" className="bg-success text-white">Paid</Badge>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </TabsContent>
-
-                  <TabsContent value="rejected" className="space-y-4">
-                    {rejectedWithdrawals.length === 0 ? (
-                      <div className="py-12 text-center">
-                        <p className="text-text-secondary">No rejected withdrawals</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-4">
-                        {rejectedWithdrawals.map((withdrawal) => (
-                          <div key={withdrawal.id} className="bg-danger/10 rounded-2xl p-4">
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
-                                <div>
-                                  <span className="font-medium text-text-primary">User:</span> {withdrawal.profiles?.display_name || withdrawal.profiles?.username}
-                                </div>
-                                <div>
-                                  <span className="font-medium text-text-primary">Amount:</span> {formatZcredDisplay(withdrawal.amount_zcreds)}
-                                </div>
-                                <div>
-                                  <span className="font-medium text-text-primary">Reason:</span> {withdrawal.rejection_reason || 'No reason provided'}
-                                </div>
-                                <div>
-                                  <span className="font-medium text-text-primary">Date:</span> {formatDate(withdrawal.created_at)}
-                                </div>
-                              </div>
-                              <Badge variant="destructive">Rejected</Badge>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </TabsContent>
-                </Tabs>
+                <p className="text-text-secondary">Withdrawal functionality coming soon...</p>
               </TabsContent>
             </Tabs>
           </CardContent>
