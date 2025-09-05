@@ -466,9 +466,9 @@ export default function AdminWalletRequests() {
                                <DialogContent className="sm:max-w-[425px] bg-background border-border">
                                  <DialogHeader className="text-center">
                                    <DialogTitle className="text-xl font-bold text-text-primary">Verify Deposit</DialogTitle>
-                                   <DialogDescription className="text-lg font-semibold text-text-primary mt-2">
-                                     HOW MANY Z CRED U WANT TO DEPOSIT
-                                   </DialogDescription>
+                                    <DialogDescription className="text-lg font-semibold text-text-primary mt-2">
+                                      HOW MANY Z CRED U WANT TO DEPOSIT
+                                    </DialogDescription>
                                  </DialogHeader>
                                  
                                  <div className="space-y-6 py-6">
