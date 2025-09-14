@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,7 +14,8 @@ import {
   User as UserIcon,
   LogOut,
   Menu,
-  X
+  X,
+  ArrowLeft
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -34,6 +35,7 @@ export function Layout({ children }: LayoutProps) {
   const [profile, setProfile] = useState<any>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Get initial session
@@ -95,6 +97,21 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Back Arrow - Top Left */}
+      {location.pathname !== "/" && (
+        <div className="fixed top-4 left-4 z-50">
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={() => navigate(-1)} 
+            className="flex items-center space-x-1 text-text-primary hover:text-primary bg-background/80 backdrop-blur-sm border border-border rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="hidden sm:inline">Back</span>
+          </Button>
+        </div>
+      )}
+      
       {/* Main Content */}
       <main className="flex-1">
         {children}
