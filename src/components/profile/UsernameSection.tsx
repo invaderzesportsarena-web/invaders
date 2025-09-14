@@ -115,7 +115,7 @@ export function UsernameSection({ user, profile, onUpdate }: UsernameSectionProp
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="Enter your username"
-                className="bg-bg-700 border-stroke text-text-primary pr-8"
+                className="bg-background border-border text-foreground pr-8"
               />
               {checking && (
                 <div className="absolute right-2 top-1/2 -translate-y-1/2">
