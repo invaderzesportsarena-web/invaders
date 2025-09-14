@@ -751,21 +751,7 @@ export type Database = {
       }
     }
     Views: {
-      zcred_balances: {
-        Row: {
-          balance: number | null
-          user_id: string | null
-        }
-        Insert: {
-          balance?: number | null
-          user_id?: string | null
-        }
-        Update: {
-          balance?: number | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       admin_adjust_wallet: {
