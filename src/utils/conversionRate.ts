@@ -29,8 +29,8 @@ export const getLatestConversionRate = async (): Promise<number> => {
 
     if (error) {
       console.error('Error fetching conversion rate:', error);
-      // Fallback to default rate
-      return 90;
+// Fallback to default rate
+      return 1;
     }
 
     cachedRate = data.rate;
@@ -38,8 +38,8 @@ export const getLatestConversionRate = async (): Promise<number> => {
     return data.rate;
   } catch (error) {
     console.error('Error fetching conversion rate:', error);
-    // Fallback to default rate
-    return 90;
+// Fallback to default rate
+    return 1;
   }
 };
 
@@ -58,8 +58,8 @@ export const formatCurrency = (amount: number, currency: 'PKR' | 'ZC' = 'ZC'): s
   return `${amount.toFixed(2)} ZC`;
 };
 
-// Minimum amounts based on requirements
-export const MIN_DEPOSIT_PKR = 180;
+// Minimum amounts based on requirements  
+export const MIN_DEPOSIT_PKR = 200;
 export const MIN_WITHDRAWAL_ZC = 2;
 
 export const validateDepositAmount = (pkrAmount: number): boolean => {

@@ -12,6 +12,7 @@ import TournamentDetail from "./pages/TournamentDetail";
 import TournamentRegister from "./pages/TournamentRegister";
 import News from "./pages/News";
 import Guides from "./pages/Guides";
+import GuideDetail from "./pages/GuideDetail";
 import Shop from "./pages/Shop";
 import Wallet from "./pages/Wallet";
 import WalletDeposit from "./pages/WalletDeposit";
@@ -27,6 +28,7 @@ import AdminSettings from "./pages/AdminSettings";
 import AdminTournaments from "./pages/AdminTournaments";
 import AdminWalletRequests from "./pages/AdminWalletRequests";
 import AdminManualAdjustment from "./pages/AdminManualAdjustment";
+import AdminShopManagement from "./pages/AdminShopManagement";
 import BackgroundRemoval from "./pages/BackgroundRemoval";
 
 const queryClient = new QueryClient();
@@ -48,6 +50,7 @@ const App = () => (
             <Route path="/tournaments/:id/register" element={<TournamentRegister />} />
             <Route path="/news" element={<News />} />
             <Route path="/guides" element={<Guides />} />
+            <Route path="/guides/:slug" element={<GuideDetail />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/wallet" element={<Wallet />} />
             <Route path="/wallet/deposit" element={<WalletDeposit />} />
@@ -63,6 +66,7 @@ const App = () => (
           <Route path="/admin/manual-adjustment" element={<AdminManualAdjustment />} />
           <Route path="/admin/posts" element={<AdminPosts />} />
           <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin/shop-management" element={<AdminShopManagement />} />
           <Route path="/admin/results" element={<AdminResults />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
             

@@ -10,7 +10,8 @@ import {
   Trophy,
   BarChart3,
   Settings,
-  Medal
+  Medal,
+  DollarSign
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -119,7 +120,7 @@ export default function Admin() {
       title: "Products & Shop",
       description: "Manage shop products and redemptions",
       icon: Package,
-      href: "/admin/products",
+      href: "/admin/shop-management",
       color: "bg-accent/10 text-accent"
     },
     {
@@ -168,6 +169,24 @@ export default function Admin() {
             Welcome back, Admin. Manage your esports platform.
           </p>
         </div>
+
+        {/* Manual Z-Credit Adjustment Section */}
+        <Card className="esports-card mb-8">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-text-primary mb-2">Manual Z-Credit Adjustment</h2>
+                <p className="text-text-secondary">Add or subtract Z-Credits from any user account</p>
+              </div>
+              <Button asChild className="bg-gradient-accent hover:shadow-[var(--shadow-glow)]">
+                <Link to="/admin/manual-adjustment">
+                  <DollarSign className="w-4 h-4 mr-2" />
+                  Manage Z-Credits
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
