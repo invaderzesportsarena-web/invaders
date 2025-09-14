@@ -146,93 +146,129 @@ export default function Shop() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 py-8">
-        {/* Back Navigation */}
-        <div className="mb-6">
-          <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center space-x-2">
-            <ArrowLeft className="w-4 h-4" />
-            <span>Back</span>
-          </Button>
-        </div>
+      
+      {/* Hero Section */}
+      <div className="bg-gradient-primary border-b border-border">
+        <div className="container mx-auto px-4 py-12">
+          {/* Back Navigation */}
+          <div className="mb-6">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate(-1)} 
+              className="flex items-center space-x-2 text-white hover:bg-white/10 border-0"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back</span>
+            </Button>
+          </div>
 
-        <div className="mb-8">
-          <h1 className="text-4xl font-heading font-bold text-text-primary mb-4">
-            Z-Credits <span className="bg-gradient-accent bg-clip-text text-transparent">Shop</span>
-          </h1>
-          <div className="flex items-center justify-between">
-            <p className="text-xl text-text-secondary">
-              Redeem your Z-Credits for exclusive rewards • 1 Z-Credit = 1 PKR
-            </p>
-          {user && (
-            <div className="flex items-center gap-2 bg-card border border-border rounded-2xl px-4 py-2">
-              <span className="w-6 h-6 text-center font-bold text-primary">Z</span>
-              <span className="text-text-primary font-semibold">{balance.toLocaleString()}</span>
-              <span className="text-text-muted text-sm">credits</span>
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-4xl lg:text-5xl font-heading font-bold text-white mb-4">
+                InvaderZ <span className="text-accent">Shop</span>
+              </h1>
+              <p className="text-lg text-white/80 max-w-2xl">
+                Redeem your hard-earned Z-Credits for exclusive gaming gear, merchandise, and digital rewards
+              </p>
             </div>
-          )}
+            
+            {user && (
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 min-w-[280px]">
+                <div className="text-center">
+                  <div className="text-white/60 text-sm mb-2">Your Balance</div>
+                  <div className="flex items-center justify-center gap-2 mb-3">
+                    <div className="w-8 h-8 bg-accent rounded-full flex items-center justify-center text-white font-bold">Z</div>
+                    <span className="text-3xl font-bold text-white">{balance.toLocaleString()}</span>
+                  </div>
+                  <div className="text-white/60 text-sm">≈ {balance.toLocaleString()} PKR</div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {products.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="w-16 h-16 bg-secondary/50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Package className="w-8 h-8 text-text-muted" />
+      <div className="container mx-auto px-4 py-12">
+        {products.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="w-20 h-20 bg-card border border-border rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Package className="w-10 h-10 text-text-muted" />
+            </div>
+            <h3 className="text-xl font-semibold text-text-primary mb-2">No Products Available</h3>
+            <p className="text-text-muted">Check back soon for new gaming gear and rewards!</p>
           </div>
-          <p className="text-text-muted">No products available at the moment</p>
-        </div>
-      ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <Card key={product.id} className="esports-card group">
-              {product.image_url && (
-                <div className="aspect-square overflow-hidden rounded-t-2xl">
-                  <img 
-                    src={product.image_url} 
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-              )}
-              <CardHeader>
-                <div className="flex items-center justify-between mb-2">
-                  <Badge variant="outline" className="text-xs">
-                    {product.stock} in stock
-                  </Badge>
-                  <div className="flex flex-col items-end">
-                    <div className="flex items-center gap-1 text-primary font-bold text-lg">
-                      <span className="w-4 h-4 text-center text-sm">Z</span>
-                      <span>{product.price_credits}</span>
+        ) : (
+          <>
+            <div className="text-center mb-12">
+              <h2 className="text-2xl font-heading font-bold text-text-primary mb-4">Featured Products</h2>
+              <p className="text-text-secondary max-w-2xl mx-auto">
+                From premium gaming peripherals to exclusive InvaderZ merchandise, upgrade your setup with Z-Credits
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+              {products.map((product) => (
+                <div key={product.id} className="group">
+                  <Card className="h-full border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 transition-all duration-300 overflow-hidden">
+                    {product.image_url && (
+                      <div className="relative aspect-square overflow-hidden">
+                        <img 
+                          src={product.image_url} 
+                          alt={product.name}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        
+                        {/* Stock Badge */}
+                        <div className="absolute top-3 left-3">
+                          <Badge variant="secondary" className="bg-black/70 text-white border-0 backdrop-blur-sm">
+                            {product.stock} left
+                          </Badge>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="p-6">
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="font-bold text-lg text-text-primary line-clamp-2 group-hover:text-primary transition-colors">
+                          {product.name}
+                        </h3>
+                        <div className="flex flex-col items-end ml-3">
+                          <div className="flex items-center gap-1">
+                            <div className="w-5 h-5 bg-accent rounded-full flex items-center justify-center">
+                              <span className="text-white text-xs font-bold">Z</span>
+                            </div>
+                            <span className="font-bold text-xl text-text-primary">{product.price_credits}</span>
+                          </div>
+                          <div className="text-xs text-text-muted">
+                            ≈ {product.price_credits.toLocaleString()} PKR
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {product.description && (
+                        <p className="text-text-secondary text-sm line-clamp-3 mb-6">
+                          {product.description}
+                        </p>
+                      )}
+                      
+                      <Button 
+                        className="w-full bg-gradient-accent hover:bg-gradient-accent/90 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group/btn"
+                        onClick={() => handleRedeem(product)}
+                        disabled={!user || balance < product.price_credits}
+                      >
+                        <ShoppingBag className="w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform" />
+                        {!user ? "Sign In to Order" : balance < product.price_credits ? "Insufficient Credits" : "Order Now"}
+                      </Button>
                     </div>
-                    <div className="text-xs text-text-secondary">
-                      ≈ {product.price_credits.toLocaleString()} PKR
-                    </div>
-                  </div>
+                  </Card>
                 </div>
-                <CardTitle className="text-lg text-text-primary line-clamp-2">
-                  {product.name}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {product.description && (
-                  <p className="text-text-secondary text-sm line-clamp-3">
-                    {product.description}
-                  </p>
-                )}
-                <Button 
-                  className="w-full bg-gradient-accent hover:shadow-[var(--shadow-glow)] font-bold"
-                  onClick={() => handleRedeem(product)}
-                  disabled={!user || balance < product.price_credits}
-                >
-                  <ShoppingBag className="w-4 h-4 mr-2" />
-                  {!user ? "Sign In to Redeem" : balance < product.price_credits ? "Insufficient Z-Creds" : "Order Now"}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
