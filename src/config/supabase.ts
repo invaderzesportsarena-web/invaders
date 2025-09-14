@@ -104,5 +104,5 @@ export const SUPABASE_CONFIG = {
 export const VALIDATION = {
   ZCRED_REGEX: /^\d+(\.\d{1,2})?$/,
   MIN_DEPOSIT_PKR: 180,
-  EXCHANGE_RATE: 90, // 1 Z-Credit = 90 PKR
+  EXCHANGE_RATE: 1, // 1 Z-Credit = 1 PKR
 } as const;
