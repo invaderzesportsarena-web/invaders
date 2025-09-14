@@ -222,9 +222,11 @@ export type Database = {
           created_at: string
           display_name: string | null
           id: string
+          in_game_name: string | null
           phone: string | null
           role: Database["public"]["Enums"]["role_enum"]
           username: string | null
+          whatsapp: string | null
           whatsapp_number: string | null
         }
         Insert: {
@@ -232,9 +234,11 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id: string
+          in_game_name?: string | null
           phone?: string | null
           role?: Database["public"]["Enums"]["role_enum"]
           username?: string | null
+          whatsapp?: string | null
           whatsapp_number?: string | null
         }
         Update: {
@@ -242,9 +246,11 @@ export type Database = {
           created_at?: string
           display_name?: string | null
           id?: string
+          in_game_name?: string | null
           phone?: string | null
           role?: Database["public"]["Enums"]["role_enum"]
           username?: string | null
+          whatsapp?: string | null
           whatsapp_number?: string | null
         }
         Relationships: []

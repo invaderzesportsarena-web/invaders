@@ -22,6 +22,7 @@ export function PersonalInfoSection({ user, profile, onUpdate }: PersonalInfoSec
     display_name: profile?.display_name || "",
     phone: profile?.phone || "",
     whatsapp_number: profile?.whatsapp_number || "",
+    in_game_name: profile?.in_game_name || "",
     avatar_url: profile?.avatar_url || ""
   });
   const { toast } = useToast();
@@ -82,9 +83,9 @@ export function PersonalInfoSection({ user, profile, onUpdate }: PersonalInfoSec
   };
 
   return (
-    <Card className="bg-[#0F1621] border-[#233246] rounded-2xl shadow-lg">
+    <Card className="bg-card border-border rounded-2xl shadow-lg">
       <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-text-primary">
+        <CardTitle className="flex items-center gap-2 text-card-foreground">
           <User className="w-5 h-5" />
           Personal Information
         </CardTitle>
@@ -100,7 +101,7 @@ export function PersonalInfoSection({ user, profile, onUpdate }: PersonalInfoSec
           </Avatar>
           <div>
             <Label htmlFor="avatar-upload" className="cursor-pointer">
-              <Button variant="outline" disabled={uploading} asChild className="border-stroke hover:bg-bg-700">
+              <Button variant="outline" disabled={uploading} asChild className="border-border hover:bg-muted">
                 <span>
                   <Upload className="w-4 h-4 mr-2" />
                   {uploading ? "Uploading..." : "Change Avatar"}
@@ -114,42 +115,53 @@ export function PersonalInfoSection({ user, profile, onUpdate }: PersonalInfoSec
               onChange={handleAvatarUpload}
               className="hidden"
             />
-            <p className="text-sm text-text-muted mt-1">JPG, PNG up to 5MB</p>
+            <p className="text-sm text-muted-foreground mt-1">JPG, PNG up to 5MB</p>
           </div>
         </div>
 
         {/* Form Fields */}
         <div className="space-y-4">
           <div>
-            <Label htmlFor="display_name" className="text-text-secondary">Display Name</Label>
+            <Label htmlFor="display_name" className="text-muted-foreground">Display Name</Label>
             <Input
               id="display_name"
               value={formData.display_name}
               onChange={(e) => setFormData(prev => ({ ...prev, display_name: e.target.value }))}
               placeholder="Enter your display name"
-              className="bg-bg-700 border-stroke text-text-primary mt-1"
+              className="bg-input border-border text-foreground mt-1"
             />
           </div>
 
           <div>
-            <Label htmlFor="phone" className="text-text-secondary">Phone Number</Label>
+            <Label htmlFor="in_game_name" className="text-muted-foreground">In-Game Name</Label>
+            <Input
+              id="in_game_name"
+              value={formData.in_game_name}
+              onChange={(e) => setFormData(prev => ({ ...prev, in_game_name: e.target.value }))}
+              placeholder="Enter your in-game name"
+              className="bg-input border-border text-foreground mt-1"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="phone" className="text-muted-foreground">Phone Number</Label>
             <Input
               id="phone"
               value={formData.phone}
               onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
               placeholder="Enter your phone number"
-              className="bg-bg-700 border-stroke text-text-primary mt-1"
+              className="bg-input border-border text-foreground mt-1"
             />
           </div>
 
           <div>
-            <Label htmlFor="whatsapp_number" className="text-text-secondary">WhatsApp Number</Label>
+            <Label htmlFor="whatsapp_number" className="text-muted-foreground">WhatsApp Number</Label>
             <Input
               id="whatsapp_number"
               value={formData.whatsapp_number}
               onChange={(e) => setFormData(prev => ({ ...prev, whatsapp_number: e.target.value }))}
               placeholder="Enter your WhatsApp number"
-              className="bg-bg-700 border-stroke text-text-primary mt-1"
+              className="bg-input border-border text-foreground mt-1"
             />
           </div>
         </div>
