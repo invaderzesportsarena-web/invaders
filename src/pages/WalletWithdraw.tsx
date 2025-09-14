@@ -11,6 +11,13 @@ import { useToast } from "@/hooks/use-toast";
 import { validateZcredInput, parseZcreds, formatZcreds, formatZcredDisplay, formatPkrFromZcreds } from "@/utils/formatZcreds";
 import { getLatestConversionRate, convertZcToPkr, MIN_WITHDRAWAL_ZC } from "@/utils/conversionRate";
 import { SUPABASE_CONFIG, VALIDATION } from "@/config/supabase";
+import { 
+  validateFinancialAmount, 
+  validateAndSanitizeText, 
+  validateAccountNumber,
+  validateIBAN,
+  checkRateLimit 
+} from "@/utils/securityValidation";
 
 export default function WalletWithdraw() {
   const [user, setUser] = useState<any>(null);
@@ -79,6 +86,67 @@ export default function WalletWithdraw() {
     e.preventDefault();
     
     if (!user) return;
+
+    // Rate limiting check
+    if (!checkRateLimit('withdrawal_submission', 2, 60000)) { // 2 attempts per minute
+      toast({
+        title: "Too Many Requests",
+        description: "Please wait before submitting another withdrawal request",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Enhanced validation
+    const amountValidation = validateFinancialAmount(formData.amount_zcreds, 'zcreds', MIN_WITHDRAWAL_ZC, balance);
+    if (!amountValidation.isValid) {
+      toast({
+        title: "Invalid Amount",
+        description: amountValidation.error,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const nameValidation = validateAndSanitizeText(formData.recipient_name, "Recipient name", 2, 100);
+    if (!nameValidation.isValid) {
+      toast({
+        title: "Invalid Recipient Name",
+        description: nameValidation.error,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const bankValidation = validateAndSanitizeText(formData.recipient_bank, "Bank name", 2, 50);
+    if (!bankValidation.isValid) {
+      toast({
+        title: "Invalid Bank Name",
+        description: bankValidation.error,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const accountValidation = validateAccountNumber(formData.recipient_account_no);
+    if (!accountValidation.isValid) {
+      toast({
+        title: "Invalid Account Number",
+        description: accountValidation.error,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const ibanValidation = validateIBAN(formData.iban_optional);
+    if (!ibanValidation.isValid) {
+      toast({
+        title: "Invalid IBAN",
+        description: ibanValidation.error,
+        variant: "destructive"
+      });
+      return;
+    }
 
     // Validate required fields
     if (!formData.amount_zcreds || !formData.recipient_name || !formData.recipient_bank || !formData.recipient_account_no) {

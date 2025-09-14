@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { AdminGuard } from "@/components/AdminGuard";
 import { useNavigate } from "react-router-dom";
+import SecurityAlert from "@/components/SecurityAlert";
 
 interface DashboardStats {
   totalUsers: number;
@@ -159,6 +160,9 @@ export default function AdminDashboard() {
               Complete control panel for managing InvaderZ platform
             </p>
           </div>
+
+          {/* Security Alert */}
+          <SecurityAlert isAdmin={true} />
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

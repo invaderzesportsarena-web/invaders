@@ -10,6 +10,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { validateZcredInput, parseZcreds } from "@/utils/formatZcreds";
 import { getLatestConversionRate, convertPkrToZc, MIN_DEPOSIT_PKR } from "@/utils/conversionRate";
+import { 
+  validateFinancialAmount, 
+  validateAndSanitizeText, 
+  validateAccountNumber,
+  checkRateLimit 
+} from "@/utils/securityValidation";
 import { StorageManager } from "@/utils/storageUtils";
 import { SUPABASE_CONFIG } from "@/config/supabase";
 import BankingInfo from "@/components/BankingInfo";
@@ -94,6 +100,57 @@ export default function WalletDeposit() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+
+    // Rate limiting check
+    if (!checkRateLimit('deposit_submission', 3, 60000)) { // 3 attempts per minute
+      toast({
+        title: "Too Many Requests",
+        description: "Please wait before submitting another deposit request",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Enhanced validation
+    const amountValidation = validateFinancialAmount(formData.amount_money, 'pkr', MIN_DEPOSIT_PKR);
+    if (!amountValidation.isValid) {
+      toast({
+        title: "Invalid Amount",
+        description: amountValidation.error,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const senderNameValidation = validateAndSanitizeText(formData.bank_sender_name, "Sender name", 2, 100);
+    if (!senderNameValidation.isValid) {
+      toast({
+        title: "Invalid Sender Name",
+        description: senderNameValidation.error,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const bankValidation = validateAndSanitizeText(formData.sender_bank, "Bank name", 2, 50);
+    if (!bankValidation.isValid) {
+      toast({
+        title: "Invalid Bank Name",
+        description: bankValidation.error,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const accountValidation = validateAccountNumber(formData.sender_account_no);
+    if (!accountValidation.isValid) {
+      toast({
+        title: "Invalid Account Number",
+        description: accountValidation.error,
+        variant: "destructive"
+      });
+      return;
+    }
 
     // Validate required fields
     if (!formData.amount_money || !formData.bank_sender_name || !formData.sender_bank || !formData.sender_account_no || !formData.transfer_timestamp) {

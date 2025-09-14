@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Trophy, Mail, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { validatePasswordStrength, checkRateLimit } from "@/utils/securityValidation";
 
 export default function Auth() {
   const [email, setEmail] = useState("");
@@ -32,6 +33,22 @@ export default function Auth() {
     if (!email || !password) {
       setError("Please fill in all fields");
       return;
+    }
+
+    // Rate limiting for authentication attempts
+    const rateKey = isSignUp ? 'signup_attempt' : 'signin_attempt';
+    if (!checkRateLimit(rateKey, 5, 300000)) { // 5 attempts per 5 minutes
+      setError("Too many attempts. Please wait before trying again.");
+      return;
+    }
+
+    // Password strength validation for sign-up
+    if (isSignUp) {
+      const passwordValidation = validatePasswordStrength(password);
+      if (!passwordValidation.isValid) {
+        setError(passwordValidation.error || "Password does not meet security requirements");
+        return;
+      }
     }
 
     setLoading(true);
