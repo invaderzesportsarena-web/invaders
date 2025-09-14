@@ -247,15 +247,7 @@ export type Database = {
           username?: string | null
           whatsapp_number?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "me"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       registrations: {
         Row: {
@@ -663,13 +655,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "zcred_transactions_reviewed_by_fkey"
-            columns: ["reviewed_by"]
-            isOneToOne: false
-            referencedRelation: "me"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "zcred_transactions_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -694,15 +679,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "zcred_wallets_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "me"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       zcred_withdrawal_forms: {
         Row: {
@@ -765,38 +742,20 @@ export type Database = {
       }
     }
     Views: {
-      me: {
-        Row: {
-          created_at: string | null
-          email: string | null
-          id: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          email?: string | null
-          id?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          email?: string | null
-          id?: string | null
-        }
-        Relationships: []
-      }
       zcred_balances: {
         Row: {
           balance: number | null
           user_id: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "zcred_transactions_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Insert: {
+          balance?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          balance?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {
