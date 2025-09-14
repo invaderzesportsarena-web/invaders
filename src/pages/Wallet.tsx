@@ -9,7 +9,6 @@ import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/Header";
 import { formatZcreds, formatZcredDisplay, formatPkrFromZcreds } from "@/utils/formatZcreds";
 import { getLatestConversionRate } from "@/utils/conversionRate";
-
 interface Transaction {
   id: string;
   amount: number;
@@ -17,7 +16,6 @@ interface Transaction {
   status: string;
   created_at: string;
 }
-
 export default function Wallet() {
   const [user, setUser] = useState<any>(null);
   const [balance, setBalance] = useState<number>(0);
@@ -25,85 +23,80 @@ export default function Wallet() {
   const [conversionRate, setConversionRate] = useState<number>(90);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     checkAuth();
     loadConversionRate();
   }, []);
-
   const loadConversionRate = async () => {
     const rate = await getLatestConversionRate();
     setConversionRate(rate);
   };
-
   const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: {
+        session
+      }
+    } = await supabase.auth.getSession();
     if (!session?.user) {
       navigate('/auth');
       return;
     }
     setUser(session.user);
-    await Promise.all([
-      fetchBalance(session.user.id),
-      fetchTransactions(session.user.id)
-    ]);
+    await Promise.all([fetchBalance(session.user.id), fetchTransactions(session.user.id)]);
     setLoading(false);
   };
-
   const fetchBalance = async (userId: string) => {
     try {
       // Use the proper zcred_wallets table
-      const { data, error } = await supabase
-        .from('zcred_wallets')
-        .select('balance')
-        .eq('user_id', userId)
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from('zcred_wallets').select('balance').eq('user_id', userId).single();
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching balance:', error.message);
         setBalance(0);
         return;
       }
-      
       setBalance(data?.balance || 0);
     } catch (error: any) {
       console.error('Error fetching balance:', error.message);
       setBalance(0);
     }
   };
-
   const fetchTransactions = async (userId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('zcred_transactions')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false })
-        .limit(20);
-
+      const {
+        data,
+        error
+      } = await supabase.from('zcred_transactions').select('*').eq('user_id', userId).eq('status', 'approved').order('created_at', {
+        ascending: false
+      }).limit(20);
       if (error) throw error;
       setTransactions(data || []);
     } catch (error: any) {
       console.error('Error fetching transactions:', error.message);
     }
   };
-
   const getTransactionIcon = (type: string, amount: number) => {
     return amount > 0 ? TrendingUp : TrendingDown;
   };
-
   const getTransactionLabel = (type: string) => {
     switch (type) {
-      case 'deposit_credit': return 'Deposit';
-      case 'withdrawal_payout': return 'Withdrawal';
-      case 'manual_adjustment': return 'Manual Adjustment';
-      case 'tournament_entry': return 'Tournament Entry';
-      default: return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+      case 'deposit_credit':
+        return 'Deposit';
+      case 'withdrawal_payout':
+        return 'Withdrawal';
+      case 'manual_adjustment':
+        return 'Manual Adjustment';
+      case 'tournament_entry':
+        return 'Tournament Entry';
+      default:
+        return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
     }
   };
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       day: '2-digit',
@@ -113,10 +106,8 @@ export default function Wallet() {
       minute: '2-digit'
     });
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen">
+    return <div className="min-h-screen">
         <Header />
         <div className="container mx-auto py-8 px-4">
           <div className="animate-pulse space-y-6">
@@ -125,12 +116,9 @@ export default function Wallet() {
             <div className="h-64 bg-secondary/50 rounded"></div>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen">
+  return <div className="min-h-screen">
       <Header />
       <div className="container mx-auto py-8 px-4 space-y-6">
         {/* Back Navigation */}
@@ -162,9 +150,7 @@ export default function Wallet() {
               </div>
               <div>
                 <CardTitle className="text-text-primary text-xl">Current Balance</CardTitle>
-                <CardDescription className="text-text-secondary">
-                  Available Z-Credits • Min deposit: 2 ZC • Min withdrawal: 3 ZC
-                </CardDescription>
+                <CardDescription className="text-text-secondary">Available Z-Credits • Min deposit: 200 ZC • Min withdrawal: 150 ZC</CardDescription>
               </div>
             </div>
             <div className="text-right">
@@ -196,7 +182,7 @@ export default function Wallet() {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-text-secondary">Withdrawal Fee:</span>
-                <span className="text-text-primary font-bold ml-2">0.1 ZC</span>
+                <span className="text-text-primary font-bold ml-2">10 ZC</span>
               </div>
               <div>
                 <span className="text-text-secondary">Processing:</span>
@@ -216,32 +202,20 @@ export default function Wallet() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {transactions.length === 0 ? (
-            <div className="text-center py-12">
+          {transactions.length === 0 ? <div className="text-center py-12">
               <WalletIcon className="w-12 h-12 text-text-muted mx-auto mb-4" />
               <p className="text-text-muted text-lg">No transactions yet</p>
               <p className="text-text-secondary text-sm">
                 Start by making a deposit to earn Z-Credits
               </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {transactions.map((transaction) => {
-                const Icon = getTransactionIcon(transaction.type, transaction.amount);
-                const isPositive = transaction.amount > 0;
-                
-                return (
-                  <div
-                    key={transaction.id}
-                    className="flex items-center justify-between p-4 rounded-2xl border border-border hover:bg-secondary/20 transition-colors"
-                  >
+            </div> : <div className="space-y-4">
+              {transactions.map(transaction => {
+              const Icon = getTransactionIcon(transaction.type, transaction.amount);
+              const isPositive = transaction.amount > 0;
+              return <div key={transaction.id} className="flex items-center justify-between p-4 rounded-2xl border border-border hover:bg-secondary/20 transition-colors">
                     <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                        isPositive ? 'bg-success/10' : 'bg-danger/10'
-                      }`}>
-                        <Icon className={`w-5 h-5 ${
-                          isPositive ? 'text-success' : 'text-danger'
-                        }`} />
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isPositive ? 'bg-success/10' : 'bg-danger/10'}`}>
+                        <Icon className={`w-5 h-5 ${isPositive ? 'text-success' : 'text-danger'}`} />
                       </div>
                       <div>
                         <p className="font-semibold text-text-primary">
@@ -253,23 +227,18 @@ export default function Wallet() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className={`font-bold ${
-                        isPositive ? 'text-success' : 'text-danger'
-                      }`}>
+                      <p className={`font-bold ${isPositive ? 'text-success' : 'text-danger'}`}>
                         {isPositive ? '+' : ''}{formatZcreds(transaction.amount)} ZC
                       </p>
                       <Badge variant="secondary" className="text-xs">
                         {transaction.status}
                       </Badge>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+                  </div>;
+            })}
+            </div>}
         </CardContent>
         </Card>
       </div>
-    </div>
-  );
+    </div>;
 }
