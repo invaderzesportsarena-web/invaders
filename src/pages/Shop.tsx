@@ -254,14 +254,22 @@ export default function Shop() {
                         </p>
                       )}
                       
-                      <Button 
-                        className="w-full bg-gradient-accent hover:bg-gradient-accent/90 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group/btn"
-                        onClick={() => handleRedeem(product)}
-                        disabled={!user || balance < product.price_credits}
-                      >
-                        <ShoppingBag className="w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform" />
-                        {!user ? "Sign In to Order" : balance < product.price_credits ? "Insufficient Credits" : "Order Now"}
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          className="flex-1 bg-gradient-accent hover:bg-gradient-accent/90 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group/btn"
+                          onClick={() => navigate(`/shop/product/${product.id}`)}
+                        >
+                          View Details
+                        </Button>
+                        <Button 
+                          className="flex-1 bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group/btn"
+                          onClick={() => handleRedeem(product)}
+                          disabled={!user || balance < product.price_credits}
+                        >
+                          <ShoppingBag className="w-4 h-4 mr-2 group-hover/btn:scale-110 transition-transform" />
+                          {!user ? "Sign In" : balance < product.price_credits ? "Low Credits" : "Buy Now"}
+                        </Button>
+                      </div>
                     </div>
                   </Card>
                 </div>
