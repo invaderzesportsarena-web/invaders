@@ -90,7 +90,7 @@ export const SUPABASE_CONFIG = {
   
   storage: {
     buckets: {
-      WALLET_PROOFS: 'wallet_proofs',
+      WALLET_PROOFS: 'proofs', // Use existing proofs bucket
       FALLBACK_BUCKET: 'proofs', // Fallback bucket name
     },
   },
