@@ -77,12 +77,25 @@ export class StorageManager {
         throw new Error(`Upload failed: ${uploadError.message}`);
       }
 
-      // Get public URL or signed URL based on bucket privacy
-      const { data: { publicUrl } } = supabase.storage
-        .from(actualBucket)
-        .getPublicUrl(fileName);
+      // For private buckets like wallet_proofs, use signed URLs
+      if (actualBucket === SUPABASE_CONFIG.storage.buckets.WALLET_PROOFS) {
+        const { data, error: signedError } = await supabase.storage
+          .from(actualBucket)
+          .createSignedUrl(fileName, 60 * 60 * 24 * 7); // 7 days expiry
 
-      return { url: publicUrl };
+        if (signedError) {
+          throw new Error(`Failed to create signed URL: ${signedError.message}`);
+        }
+
+        return { url: data?.signedUrl || '' };
+      } else {
+        // For public buckets, use public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from(actualBucket)
+          .getPublicUrl(fileName);
+
+        return { url: publicUrl };
+      }
     } catch (error: any) {
       console.error('Upload error:', error);
       return { 
