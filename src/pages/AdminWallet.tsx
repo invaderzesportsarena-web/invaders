@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Wallet, Check, X, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { StorageManager } from "@/utils/storageUtils";
 import { useToast } from "@/hooks/use-toast";
 import { AdminGuard } from "@/components/AdminGuard";
 import { formatZcreds, formatZcredDisplay, formatPkrFromZcreds } from "@/utils/formatZcreds";
@@ -71,6 +72,40 @@ export default function AdminWallet() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  // Helper function to handle screenshot viewing
+  const handleViewScreenshot = async (screenshotUrl: string) => {
+    try {
+      // Extract the file path from the URL
+      const urlParts = screenshotUrl.split('/');
+      const bucketIndex = urlParts.findIndex(part => part === 'wallet_proofs');
+      
+      if (bucketIndex !== -1 && bucketIndex < urlParts.length - 1) {
+        const filePath = urlParts.slice(bucketIndex + 1).join('/');
+        const signedUrl = await StorageManager.getSignedUrl('wallet_proofs', filePath);
+        
+        if (signedUrl) {
+          window.open(signedUrl, '_blank');
+        } else {
+          toast({
+            title: "Error",
+            description: "Could not generate viewing link for screenshot",
+            variant: "destructive"
+          });
+        }
+      } else {
+        // Fallback: try to open the original URL
+        window.open(screenshotUrl, '_blank');
+      }
+    } catch (error) {
+      console.error('Error viewing screenshot:', error);
+      toast({
+        title: "Error",
+        description: "Could not open screenshot",
+        variant: "destructive"
+      });
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -358,11 +393,13 @@ export default function AdminWallet() {
                           
                           <div className="flex gap-2 ml-4">
                             {deposit.screenshot_url && (
-                              <Button size="sm" variant="outline" asChild>
-                                <a href={deposit.screenshot_url} target="_blank" rel="noopener noreferrer">
-                                  <Eye className="w-4 h-4 mr-1" />
-                                  View
-                                </a>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                onClick={() => handleViewScreenshot(deposit.screenshot_url)}
+                              >
+                                <Eye className="w-4 h-4 mr-1" />
+                                View
                               </Button>
                             )}
                             
