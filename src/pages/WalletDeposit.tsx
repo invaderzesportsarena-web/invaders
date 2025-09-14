@@ -12,6 +12,7 @@ import { validateZcredInput, parseZcreds } from "@/utils/formatZcreds";
 import { getLatestConversionRate, convertPkrToZc, MIN_DEPOSIT_PKR } from "@/utils/conversionRate";
 import { StorageManager } from "@/utils/storageUtils";
 import { SUPABASE_CONFIG } from "@/config/supabase";
+import BankingInfo from "@/components/BankingInfo";
 export default function WalletDeposit() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -169,9 +170,7 @@ export default function WalletDeposit() {
             Send your amount to the number below. Minimum deposit: {MIN_DEPOSIT_PKR} PKR (2 Z-Credits)
             <br />Current rate: 1 Z-Credit = {conversionRate} PKR
             <br /><br />
-            <strong>03282673854</strong><br />
-            MUHAMMAD SAQIB<br />
-            EASY PAISA
+            <BankingInfo />
           </CardDescription>
         </CardHeader>
         <CardContent>
