@@ -689,6 +689,7 @@ export type Database = {
       }
       zcred_withdrawal_forms: {
         Row: {
+          amount_pkr: number | null
           amount_zcreds: number
           approved_credits: number | null
           created_at: string
@@ -705,6 +706,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          amount_pkr?: number | null
           amount_zcreds: number
           approved_credits?: number | null
           created_at?: string
@@ -721,6 +723,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          amount_pkr?: number | null
           amount_zcreds?: number
           approved_credits?: number | null
           created_at?: string
