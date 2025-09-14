@@ -393,13 +393,11 @@ export default function AdminWallet() {
                           
                           <div className="flex gap-2 ml-4">
                             {deposit.screenshot_url && (
-                              <Button 
-                                size="sm" 
-                                variant="outline" 
-                                onClick={() => handleViewScreenshot(deposit.screenshot_url)}
-                              >
-                                <Eye className="w-4 h-4 mr-1" />
-                                View
+                              <Button size="sm" variant="outline" asChild>
+                                <a href={deposit.screenshot_url} target="_blank" rel="noopener noreferrer">
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  View
+                                </a>
                               </Button>
                             )}
                             
