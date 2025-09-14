@@ -59,7 +59,7 @@ export default function Shop() {
   const fetchBalance = async (userId: string) => {
     try {
       const { data, error } = await supabase
-        .from('zcred_balances')
+        .from('zcred_wallets')
         .select('balance')
         .eq('user_id', userId)
         .single();
