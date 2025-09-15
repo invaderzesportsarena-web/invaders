@@ -92,8 +92,8 @@ export default function AdminDashboard() {
 
   const quickActions = [
     {
-      title: "Manage Users",
-      description: "View and manage user accounts",
+      title: "User Role Management",
+      description: "Change user roles and permissions",
       icon: Users,
       path: "/admin/users",
       count: stats.totalUsers
