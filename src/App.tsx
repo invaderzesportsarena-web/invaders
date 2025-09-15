@@ -27,6 +27,7 @@ import AdminPosts from "./pages/AdminPosts";
 import AdminProducts from "./pages/AdminProducts";
 import AdminResults from "./pages/AdminResults";
 import AdminSettings from "./pages/AdminSettings";
+import AdminUserManagement from "./pages/AdminUserManagement";
 import AdminTournaments from "./pages/AdminTournaments";
 import AdminWalletRequests from "./pages/AdminWalletRequests";
 import AdminManualAdjustment from "./pages/AdminManualAdjustment";
@@ -73,6 +74,7 @@ const App = () => (
           <Route path="/admin/shop-management" element={<AdminShopManagement />} />
           <Route path="/admin/results" element={<AdminResults />} />
           <Route path="/admin/settings" element={<AdminSettings />} />
+          <Route path="/admin/users" element={<AdminUserManagement />} />
             
             {/* 404 fallback */}
             <Route path="*" element={<NotFound />} />
