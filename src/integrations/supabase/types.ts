@@ -916,6 +916,26 @@ export type Database = {
         Args: { deposit_id: string }
         Returns: Json
       }
+      process_withdrawal_rejection: {
+        Args: {
+          p_admin_id: string
+          p_rejection_reason: string
+          p_withdrawal_id: string
+        }
+        Returns: Json
+      }
+      process_withdrawal_submission: {
+        Args: {
+          p_amount_zcreds: number
+          p_iban_optional?: string
+          p_notes?: string
+          p_recipient_account_no: string
+          p_recipient_bank: string
+          p_recipient_name: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       register_for_tournament: {
         Args: {
           p_entry_fee: number

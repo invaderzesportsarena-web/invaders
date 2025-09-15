@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ArrowLeft, Wallet, Check, X, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -71,6 +73,8 @@ export default function AdminWallet() {
   const [withdrawals, setWithdrawals] = useState<WithdrawalForm[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rejectionReason, setRejectionReason] = useState<string>("");
+  const [rejectionWithdrawalId, setRejectionWithdrawalId] = useState<string>("");
   const { toast } = useToast();
 
   // Helper function to handle screenshot viewing
@@ -267,12 +271,23 @@ export default function AdminWallet() {
     }
   };
 
-  const handleWithdrawalReject = async (withdrawalId: string) => {
+  const handleWithdrawalReject = async (withdrawalId: string, rejectionReason: string) => {
     try {
-      const { error } = await supabase
-        .from('zcred_withdrawal_forms')
-        .update({ status: 'rejected' })
-        .eq('id', withdrawalId);
+      if (!rejectionReason.trim()) {
+        toast({
+          title: "Error",
+          description: "Please provide a rejection reason",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Use the database function that will restore the balance automatically
+      const { data, error } = await supabase.rpc('process_withdrawal_rejection', {
+        p_withdrawal_id: withdrawalId,
+        p_rejection_reason: rejectionReason,
+        p_admin_id: (await supabase.auth.getUser()).data.user?.id
+      });
 
       if (error) throw error;
 
@@ -280,7 +295,7 @@ export default function AdminWallet() {
 
       toast({
         title: "Success",
-        description: "Withdrawal rejected",
+        description: "Withdrawal rejected and amount restored to user's balance",
       });
     } catch (error: any) {
       console.error('Error rejecting withdrawal:', error);
@@ -515,7 +530,7 @@ export default function AdminWallet() {
 
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button size="sm" variant="destructive">
+                                <Button size="sm" variant="destructive" onClick={() => setRejectionWithdrawalId(withdrawal.id)}>
                                   <X className="w-4 h-4 mr-1" />
                                   Reject
                                 </Button>
@@ -524,13 +539,34 @@ export default function AdminWallet() {
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Reject Withdrawal</AlertDialogTitle>
                                   <AlertDialogDescription>
-                                    Are you sure you want to reject this withdrawal?
+                                    Please provide a reason for rejecting this withdrawal. The amount will be restored to the user's balance.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
+                                <div className="space-y-4">
+                                  <div>
+                                    <Label htmlFor="rejection-reason">Rejection Reason</Label>
+                                    <Input
+                                      id="rejection-reason"
+                                      placeholder="Enter reason for rejection..."
+                                      value={rejectionReason}
+                                      onChange={(e) => setRejectionReason(e.target.value)}
+                                    />
+                                  </div>
+                                </div>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction onClick={() => handleWithdrawalReject(withdrawal.id)}>
-                                    Reject
+                                  <AlertDialogCancel onClick={() => {
+                                    setRejectionReason("");
+                                    setRejectionWithdrawalId("");
+                                  }}>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => {
+                                      handleWithdrawalReject(rejectionWithdrawalId, rejectionReason);
+                                      setRejectionReason("");
+                                      setRejectionWithdrawalId("");
+                                    }}
+                                    disabled={!rejectionReason.trim()}
+                                  >
+                                    Reject & Restore Balance
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>

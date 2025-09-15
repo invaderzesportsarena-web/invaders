@@ -192,23 +192,22 @@ export default function WalletWithdraw() {
 
     setSubmitting(true);
     try {
-      const { error } = await supabase
-        .from(SUPABASE_CONFIG.tables.ZCRED_WITHDRAWAL_FORMS)
-        .insert({
-          [SUPABASE_CONFIG.columns.zcred_withdrawal_forms.USER_ID]: user.id,
-          [SUPABASE_CONFIG.columns.zcred_withdrawal_forms.AMOUNT_ZCREDS]: withdrawAmount,
-          [SUPABASE_CONFIG.columns.zcred_withdrawal_forms.RECIPIENT_NAME]: formData.recipient_name,
-          [SUPABASE_CONFIG.columns.zcred_withdrawal_forms.RECIPIENT_BANK]: formData.recipient_bank,
-          [SUPABASE_CONFIG.columns.zcred_withdrawal_forms.RECIPIENT_ACCOUNT_NO]: formData.recipient_account_no,
-          [SUPABASE_CONFIG.columns.zcred_withdrawal_forms.IBAN_OPTIONAL]: formData.iban_optional || null,
-          [SUPABASE_CONFIG.columns.zcred_withdrawal_forms.NOTES]: formData.notes || null
-        });
+      // Use the database function to submit withdrawal with immediate deduction
+      const { data, error } = await supabase.rpc('process_withdrawal_submission', {
+        p_user_id: user.id,
+        p_amount_zcreds: withdrawAmount,
+        p_recipient_name: formData.recipient_name,
+        p_recipient_bank: formData.recipient_bank,
+        p_recipient_account_no: formData.recipient_account_no,
+        p_iban_optional: formData.iban_optional || null,
+        p_notes: formData.notes || null
+      });
 
       if (error) throw error;
 
       toast({
         title: "Withdrawal request submitted!",
-        description: "Your withdrawal request has been submitted for review. Processing typically takes 24-48 hours.",
+        description: "Your withdrawal amount has been deducted and the request is now being reviewed. Processing typically takes 24-48 hours.",
       });
 
       navigate('/wallet');
