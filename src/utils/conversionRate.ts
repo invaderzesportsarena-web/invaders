@@ -60,7 +60,7 @@ export const formatCurrency = (amount: number, currency: 'PKR' | 'ZC' = 'ZC'): s
 
 // Minimum amounts based on requirements  
 export const MIN_DEPOSIT_PKR = 200;
-export const MIN_WITHDRAWAL_ZC = 2;
+export const MIN_WITHDRAWAL_ZC = 150;
 
 export const validateDepositAmount = (pkrAmount: number): boolean => {
   return pkrAmount >= MIN_DEPOSIT_PKR;
