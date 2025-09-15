@@ -11,6 +11,7 @@ import Tournaments from "./pages/Tournaments";
 import TournamentDetail from "./pages/TournamentDetail";
 import TournamentRegister from "./pages/TournamentRegister";
 import News from "./pages/News";
+import NewsDetail from "./pages/NewsDetail";
 import Guides from "./pages/Guides";
 import GuideDetail from "./pages/GuideDetail";
 import Shop from "./pages/Shop";
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/tournaments/:id" element={<TournamentDetail />} />
             <Route path="/tournaments/:id/register" element={<TournamentRegister />} />
             <Route path="/news" element={<News />} />
+            <Route path="/news/:slug" element={<NewsDetail />} />
             <Route path="/guides" element={<Guides />} />
             <Route path="/guides/:slug" element={<GuideDetail />} />
             <Route path="/shop" element={<Shop />} />
