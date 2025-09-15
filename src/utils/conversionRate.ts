@@ -29,7 +29,7 @@ export const getLatestConversionRate = async (): Promise<number> => {
 
     if (error) {
       console.error('Error fetching conversion rate:', error);
-// Fallback to default rate
+// Fallback to 1:1 rate
       return 1;
     }
 
@@ -38,7 +38,7 @@ export const getLatestConversionRate = async (): Promise<number> => {
     return data.rate;
   } catch (error) {
     console.error('Error fetching conversion rate:', error);
-// Fallback to default rate
+// Fallback to 1:1 rate
     return 1;
   }
 };

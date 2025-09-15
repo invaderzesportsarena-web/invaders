@@ -24,7 +24,7 @@ export default function WalletDeposit() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [conversionRate, setConversionRate] = useState<number>(90);
+  const [conversionRate, setConversionRate] = useState<number>(1);
   const navigate = useNavigate();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
