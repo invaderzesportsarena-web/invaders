@@ -904,7 +904,15 @@ export type Database = {
         }
         Returns: Json
       }
+      process_all_pending_deposits: {
+        Args: Record<PropertyKey, never>
+        Returns: Json[]
+      }
       process_approved_deposit: {
+        Args: { deposit_id: string }
+        Returns: Json
+      }
+      process_verified_deposit: {
         Args: { deposit_id: string }
         Returns: Json
       }
