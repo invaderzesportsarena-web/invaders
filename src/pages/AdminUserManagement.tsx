@@ -7,7 +7,8 @@ import { ArrowLeft, Users, Shield, Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { AdminGuard } from "@/components/AdminGuard";
+import { AdminOnlyGuard } from "@/components/AdminOnlyGuard";
+import { Badge } from "@/components/ui/badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -113,19 +114,19 @@ export default function AdminUserManagement() {
 
   if (loading) {
     return (
-      <AdminGuard>
+      <AdminOnlyGuard>
         <div className="container mx-auto py-8 px-4">
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-card rounded w-1/3"></div>
             <div className="h-64 bg-card rounded"></div>
           </div>
         </div>
-      </AdminGuard>
+      </AdminOnlyGuard>
     );
   }
 
   return (
-    <AdminGuard>
+    <AdminOnlyGuard>
       <div className="container mx-auto py-8 px-4">
         <div className="mb-6">
           <Button variant="ghost" asChild className="mb-4">
@@ -202,58 +203,38 @@ export default function AdminUserManagement() {
                         </div>
                       </div>
                       
-                      <div className="flex gap-2 ml-4">
-                        {user.role !== 'admin' && (
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button size="sm" variant="destructive">
-                                Make Admin
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Make User Admin</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to make {user.username} an admin? 
-                                  They will have full access to all admin features.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction 
-                                  onClick={() => updateUserRole(user.id, 'admin', user.username)}
-                                  className="bg-destructive hover:bg-destructive/90"
-                                >
-                                  Make Admin
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        )}
+                      <div className="flex gap-3 ml-4">
+                        <Select 
+                          value={user.role} 
+                          onValueChange={(newRole) => {
+                            if (newRole !== user.role) {
+                              updateUserRole(user.id, newRole, user.username);
+                            }
+                          }}
+                        >
+                          <SelectTrigger className="w-[140px]">
+                            <SelectValue placeholder="Select role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="player">Player</SelectItem>
+                            <SelectItem value="moderator">Moderator</SelectItem>
+                            <SelectItem value="admin">Admin</SelectItem>
+                          </SelectContent>
+                        </Select>
                         
-                        {user.role !== 'moderator' && user.role !== 'admin' && (
-                          <Button 
-                            size="sm" 
-                            variant="outline"
-                            onClick={() => updateUserRole(user.id, 'moderator', user.username)}
-                          >
-                            Make Moderator
-                          </Button>
-                        )}
-                        
-                        {(user.role === 'admin' || user.role === 'moderator') && (
+                        {user.role !== 'player' && (
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button size="sm" variant="outline">
-                                Remove Role
+                                Reset to Player
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>Remove Admin/Moderator Role</AlertDialogTitle>
+                                <AlertDialogTitle>Reset User Role</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to remove {user.username}'s {user.role} role? 
-                                  They will become a regular player.
+                                  Are you sure you want to reset {user.username} to a regular player? 
+                                  This will remove all administrative privileges.
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
@@ -261,7 +242,7 @@ export default function AdminUserManagement() {
                                 <AlertDialogAction 
                                   onClick={() => updateUserRole(user.id, 'player', user.username)}
                                 >
-                                  Remove Role
+                                  Reset to Player
                                 </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
@@ -276,6 +257,6 @@ export default function AdminUserManagement() {
           </CardContent>
         </Card>
       </div>
-    </AdminGuard>
+    </AdminOnlyGuard>
   );
 }
