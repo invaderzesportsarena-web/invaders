@@ -163,11 +163,16 @@ export default function WalletDeposit() {
     }
     setSubmitting(true);
     try {
+      const pkrAmount = parseFloat(formData.amount_money);
+      const zcAmount = convertPkrToZc(pkrAmount, conversionRate);
+      
       const { error } = await supabase
         .from(SUPABASE_CONFIG.tables.ZCRED_DEPOSIT_FORMS)
         .insert({
           [SUPABASE_CONFIG.columns.zcred_deposit_forms.USER_ID]: user.id,
-          [SUPABASE_CONFIG.columns.zcred_deposit_forms.AMOUNT_MONEY]: parseFloat(formData.amount_money),
+          [SUPABASE_CONFIG.columns.zcred_deposit_forms.AMOUNT_MONEY]: pkrAmount,
+          [SUPABASE_CONFIG.columns.zcred_deposit_forms.AMOUNT_PKR]: pkrAmount,
+          [SUPABASE_CONFIG.columns.zcred_deposit_forms.AMOUNT_ZC]: zcAmount,
           [SUPABASE_CONFIG.columns.zcred_deposit_forms.BANK_SENDER_NAME]: formData.bank_sender_name,
           [SUPABASE_CONFIG.columns.zcred_deposit_forms.SENDER_BANK]: formData.sender_bank,
           [SUPABASE_CONFIG.columns.zcred_deposit_forms.SENDER_ACCOUNT_NO]: formData.sender_account_no,
