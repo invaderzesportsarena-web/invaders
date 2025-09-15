@@ -900,6 +900,10 @@ export type Database = {
         }
         Returns: Json
       }
+      process_approved_deposit: {
+        Args: { deposit_id: string }
+        Returns: Json
+      }
       register_for_tournament: {
         Args: {
           p_entry_fee: number
