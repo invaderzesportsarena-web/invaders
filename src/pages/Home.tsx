@@ -55,7 +55,7 @@ export default function Home() {
             <img 
               src="/lovable-uploads/2650bb7d-0862-44dc-9f88-90a0444a40fe.png" 
               alt="InvaderZ Esports Arena" 
-              className="h-32 md:h-48"
+              className="h-40 md:h-56 lg:h-64"
             />
           </div>
           
@@ -200,7 +200,7 @@ export default function Home() {
             <img 
               src="/lovable-uploads/61757783-88f2-438c-9551-0e80c1f19425.png" 
               alt="InvaderZ Emblem" 
-              className="h-12 opacity-60"
+              className="h-16 md:h-20 opacity-60"
             />
           </div>
           <p className="text-text-muted mb-6">
