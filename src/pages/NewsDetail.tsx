@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, ArrowLeft } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import ArticleSchema from "@/components/ArticleSchema";
 
 interface Post {
   id: string;
@@ -93,6 +94,14 @@ export default function NewsDetail() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <ArticleSchema
+        title={post.title}
+        datePublished={post.published_at}
+        category={post.category}
+        coverImage={post.cover_url}
+        url={`${window.location.origin}/news/${post.slug}`}
+      />
+      
       <div className="mb-6">
         <Link to="/news">
           <Button variant="ghost" className="mb-4">

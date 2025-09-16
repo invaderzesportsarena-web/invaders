@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, ArrowLeft, BookOpen } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Header from "@/components/Header";
+import ArticleSchema from "@/components/ArticleSchema";
 
 interface Post {
   id: string;
@@ -101,6 +102,13 @@ export default function GuideDetail() {
   return (
     <div className="min-h-screen">
       <Header />
+      <ArticleSchema
+        title={post.title}
+        datePublished={post.published_at}
+        category={post.category}
+        coverImage={post.cover_url}
+        url={`${window.location.origin}/guides/${post.slug}`}
+      />
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Back button */}
         <div className="mb-6">
