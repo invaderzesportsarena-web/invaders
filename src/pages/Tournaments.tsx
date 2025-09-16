@@ -19,6 +19,7 @@ interface Tournament {
   reg_closes_at?: string;
   entry_fee_credits: number;
   cover_url?: string;
+  slots?: number;
 }
 
 interface Registration {
@@ -38,6 +39,7 @@ export default function Tournaments() {
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [whatsappInvites, setWhatsappInvites] = useState<WhatsAppInvite[]>([]);
+  const [tournamentSlots, setTournamentSlots] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
@@ -46,6 +48,7 @@ export default function Tournaments() {
   useEffect(() => {
     checkAuth();
     fetchTournaments();
+    fetchTournamentSlots();
   }, []);
 
   const checkAuth = async () => {
@@ -103,6 +106,27 @@ export default function Tournaments() {
       setWhatsappInvites(data || []);
     } catch (error) {
       console.error('Error fetching WhatsApp invites:', error);
+    }
+  };
+
+  const fetchTournamentSlots = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('registrations')
+        .select('tournament_id, tournaments(slots)')
+        .eq('status', 'approved');
+
+      if (error) throw error;
+      
+      const slotCounts: Record<string, number> = {};
+      data?.forEach((reg: any) => {
+        const tournamentId = reg.tournament_id;
+        slotCounts[tournamentId] = (slotCounts[tournamentId] || 0) + 1;
+      });
+      
+      setTournamentSlots(slotCounts);
+    } catch (error) {
+      console.error('Error fetching tournament slots:', error);
     }
   };
 
@@ -295,8 +319,18 @@ export default function Tournaments() {
         </div>
 
         {tournament.state === 'registration_open' && (
-          <div className="text-sm text-warning">
-            {formatCountdown(tournament.reg_closes_at || tournament.starts_at)}
+          <div className="space-y-2">
+            <div className="text-sm text-warning">
+              {formatCountdown(tournament.reg_closes_at || tournament.starts_at)}
+            </div>
+            {tournament.slots && (
+              <div className="flex items-center gap-2 text-sm text-text-secondary">
+                <Users className="w-4 h-4" />
+                <span>
+                  {tournamentSlots[tournament.id] || 0}/{tournament.slots} slots filled
+                </span>
+              </div>
+            )}
           </div>
         )}
 
@@ -348,7 +382,7 @@ export default function Tournaments() {
             </>
           )}
 
-          {showResultsButton && (
+          {showResultsButton && hasUserRegistered(tournament.id) && (
             <Button 
               variant="outline"
               className="flex-1"
@@ -457,7 +491,7 @@ export default function Tournaments() {
               <TournamentCard 
                 key={tournament.id} 
                 tournament={tournament} 
-                showResultsButton
+                showResultsButton={!!user}
               />
             ))}
             {filterPlayed().length === 0 && (
@@ -475,11 +509,12 @@ export default function Tournaments() {
             </div>
           ) : (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {registrations.map((registration) => (
+               {registrations.map((registration) => (
                 <TournamentCard 
                   key={registration.tournament_id} 
                   tournament={registration.tournaments} 
                   registration={registration}
+                  showResultsButton={registration.tournaments.state === 'completed'}
                 />
               ))}
               {registrations.length === 0 && (
