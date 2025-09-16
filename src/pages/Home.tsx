@@ -7,14 +7,27 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     checkAuth();
   }, []);
 
   const checkAuth = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    setUser(session?.user || null);
+    try {
+      console.log("Home: Checking auth...");
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error) {
+        console.error("Home: Auth error:", error);
+      } else {
+        console.log("Home: Auth session:", session);
+      }
+      setUser(session?.user || null);
+    } catch (error) {
+      console.error("Home: Unexpected error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const features = [
@@ -39,6 +52,19 @@ export default function Home() {
       description: "Real-time tournament results, match highlights, and comprehensive result galleries"
     }
   ];
+
+  console.log("Home: Rendering component, isLoading:", isLoading, "user:", user);
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-text-secondary">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">

@@ -37,7 +37,10 @@ import BackgroundRemoval from "./pages/BackgroundRemoval";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  console.log("App: Rendering main App component");
+  
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -85,6 +88,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;

@@ -32,6 +32,8 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
+  console.log("Layout: Rendering Layout component");
+  
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
