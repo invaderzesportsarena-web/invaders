@@ -123,6 +123,8 @@ export default function TournamentRegister() {
           throw new Error('Not sufficient Z-Credits, kindly deposit more funds to your wallet');
         } else if (error.message.includes('Complete your profile')) {
           throw new Error('Please complete your profile (username, WhatsApp) before registering');
+        } else if (error.message.includes('Tournament is full')) {
+          throw new Error('Tournament is full. All slots are taken.');
         }
         throw error;
       }
