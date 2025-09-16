@@ -11,7 +11,8 @@ import {
   BarChart3,
   Settings,
   Medal,
-  DollarSign
+  DollarSign,
+  UserCheck
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -89,11 +90,18 @@ export default function Admin() {
 
   const adminSections = [
     {
+      title: "User Role Management",
+      description: "Change user roles and permissions",
+      icon: Users,
+      href: "/admin/users",
+      color: "bg-primary/10 text-primary"
+    },
+    {
       title: "Tournament Registrations",
       description: "Manage registrations, approvals, and withdrawals",
-      icon: Users,
+      icon: UserCheck,
       href: "/admin/registrations",
-      color: "bg-primary/10 text-primary"
+      color: "bg-secondary/10 text-secondary"
     },
     {
       title: "Tournaments Management",
