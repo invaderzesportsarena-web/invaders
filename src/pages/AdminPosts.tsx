@@ -85,17 +85,33 @@ export default function AdminPosts() {
   };
 
   const generateSlug = (title: string) => {
-    return title
+    if (!title.trim()) return '';
+    
+    let slug = title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
+    
+    // Ensure minimum length of 3 characters
+    if (slug.length < 3) {
+      slug = slug.padEnd(3, '0');
+    }
+    
+    // Ensure maximum length of 60 characters
+    if (slug.length > 60) {
+      slug = slug.substring(0, 60).replace(/-+$/, '');
+    }
+    
+    return slug;
   };
 
   const handleTitleChange = (title: string) => {
+    const newSlug = generateSlug(title);
     setFormData(prev => ({
       ...prev,
       title,
-      slug: prev.slug || generateSlug(title)
+      // Auto-generate slug only if current slug is empty or invalid
+      slug: (!prev.slug || prev.slug.length < 3) ? newSlug : prev.slug
     }));
   };
 
@@ -138,6 +154,25 @@ export default function AdminPosts() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate slug before submission
+    if (!formData.slug || formData.slug.length < 3) {
+      toast({
+        title: "Error",
+        description: "Slug must be at least 3 characters long",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!/^[a-z0-9\-]{3,60}$/.test(formData.slug)) {
+      toast({
+        title: "Error", 
+        description: "Slug can only contain lowercase letters, numbers, and hyphens (3-60 chars)",
+        variant: "destructive"
+      });
+      return;
+    }
     
     try {
       const postData = {
