@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Link } from "react-router-dom";
 import { Trophy, Users, Zap, Target, Star, Gamepad2, Shield, DollarSign } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import Header from "@/components/Header";
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
@@ -43,7 +42,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen">
-      <Header />
       
       {/* Hero Section */}
       <section className="relative py-20 px-4 overflow-hidden">

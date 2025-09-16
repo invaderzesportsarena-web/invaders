@@ -25,6 +25,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Header from "@/components/Header";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -97,6 +98,9 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header - Only show on non-home pages */}
+      {location.pathname !== "/" && <Header />}
+      
       {/* Back Arrow - Top Left */}
       {location.pathname !== "/" && (
         <div className="fixed top-4 left-4 z-50">
