@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, ArrowLeft, BookOpen } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import Header from "@/components/Header";
 import ArticleSchema from "@/components/ArticleSchema";
 
 interface Post {
@@ -66,7 +65,6 @@ export default function GuideDetail() {
   if (loading) {
     return (
       <div className="min-h-screen">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -79,7 +77,6 @@ export default function GuideDetail() {
   if (notFound || !post) {
     return (
       <div className="min-h-screen">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center py-12">
             <div className="w-16 h-16 bg-secondary/50 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -101,7 +98,6 @@ export default function GuideDetail() {
 
   return (
     <div className="min-h-screen">
-      <Header />
       <ArticleSchema
         title={post.title}
         datePublished={post.published_at}

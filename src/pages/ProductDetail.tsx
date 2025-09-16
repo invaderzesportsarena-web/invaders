@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Star, ShoppingBag, Heart, Share2, Truck, Shield, RotateCcw, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import Header from "@/components/Header";
 
 interface Product {
   id: string;
@@ -157,7 +156,6 @@ export default function ProductDetail() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -170,7 +168,6 @@ export default function ProductDetail() {
   if (!product) {
     return (
       <div className="min-h-screen bg-background">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-text-primary mb-4">Product Not Found</h1>
@@ -183,7 +180,6 @@ export default function ProductDetail() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       
       <div className="container mx-auto px-4 py-8">
         {/* Back Navigation */}

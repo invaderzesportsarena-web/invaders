@@ -5,7 +5,6 @@ import { AccountInfoSection } from "@/components/profile/AccountInfoSection";
 import { UsernameSection } from "@/components/profile/UsernameSection";
 import { PersonalInfoSection } from "@/components/profile/PersonalInfoSection";
 import { TeamSummarySection } from "@/components/profile/TeamSummarySection";
-import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Settings, Shield } from "lucide-react";
 
@@ -52,7 +51,6 @@ export default function Profile() {
   if (loading) {
     return (
       <div className="min-h-screen">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -64,7 +62,6 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen">
-      <Header />
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         {/* Back Navigation */}
         <div className="mb-6">

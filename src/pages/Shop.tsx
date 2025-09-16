@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingBag, Package, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import Header from "@/components/Header";
 import { useNavigate } from "react-router-dom";
 
 interface Product {
@@ -135,7 +134,6 @@ export default function Shop() {
   if (loading) {
     return (
       <div className="min-h-screen">
-        <Header />
         <div className="container mx-auto px-4 py-8">
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -147,7 +145,6 @@ export default function Shop() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       
       {/* Hero Section */}
       <div className="bg-gradient-primary border-b border-border">

@@ -100,8 +100,8 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header - Only show on non-home pages */}
-      {location.pathname !== "/" && <Header />}
+      {/* Header - Show on all pages */}
+      <Header />
       
       {/* Back Arrow - Top Left */}
       {location.pathname !== "/" && (

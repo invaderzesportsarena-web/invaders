@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Clock, Trophy, Download, ExternalLink, Users, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import Header from "@/components/Header";
 import { formatInTimeZone } from "date-fns-tz";
 
 interface Tournament {
@@ -409,7 +408,6 @@ export default function Tournaments() {
   if (loading) {
     return (
       <div className="min-h-screen">
-        <Header />
         <div className="container mx-auto py-8 px-4">
           <div className="animate-pulse space-y-6">
             <div className="h-8 bg-secondary/50 rounded w-1/3"></div>
@@ -422,7 +420,6 @@ export default function Tournaments() {
 
   return (
     <div className="min-h-screen">
-      <Header />
       <div className="container mx-auto py-8 px-4">
         {/* Back Navigation */}
         <div className="mb-6">
