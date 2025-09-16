@@ -27,6 +27,7 @@
     --text-secondary: 240 5% 64%;    /* Gray text */
     --text-muted: 240 5% 44%;        /* Muted gray */
     
+    --neon-green: 116 100% 54%;      /* #00FF38 - Neon green */
     --success: 161 100% 41%;         /* #00D28F */
     --warning: 38 100% 56%;          /* #FFB020 */
     --danger: 356 95% 64%;           /* #FF4757 */
