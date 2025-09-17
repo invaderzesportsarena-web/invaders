@@ -195,9 +195,13 @@ export default function AdminPosts() {
           description: "Post updated successfully",
         });
       } else {
+        const { data: userData } = await supabase.auth.getUser();
         const { error } = await supabase
           .from('posts')
-          .insert([postData]);
+          .insert([{
+            ...postData,
+            author_id: userData.user?.id
+          }]);
 
         if (error) throw error;
         

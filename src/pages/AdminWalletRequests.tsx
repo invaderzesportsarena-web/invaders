@@ -165,13 +165,17 @@ export default function AdminWalletRequests() {
       const creditsAmount = parseFloat(actionForm.credits);
       
       // Insert approved transaction
+      const { data: currentUser } = await supabase.auth.getUser();
       const { error: transError } = await supabase
         .from(SUPABASE_CONFIG.tables.ZCRED_TRANSACTIONS)
         .insert({
           user_id: userId,
           amount: creditsAmount,
           type: 'deposit_credit',
-          status: 'approved'
+          status: 'approved',
+          reason: 'deposit_credit',
+          reviewed_by: currentUser.user?.id,
+          reviewed_at: new Date().toISOString()
         });
 
       if (transError) throw transError;
