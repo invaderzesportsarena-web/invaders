@@ -54,15 +54,7 @@ export const validateFinancialAmount = (
     return { isValid: false, error: 'Amount cannot have more than 2 decimal places' };
   }
 
-  // Type-specific limits
-  const maxLimits = {
-    zcreds: 999999.99,
-    pkr: 99999999.99
-  };
-
-  if (numAmount > maxLimits[type]) {
-    return { isValid: false, error: `Amount exceeds maximum limit of ${maxLimits[type].toLocaleString()}` };
-  }
+  // No maximum limits enforced
 
   // Custom min/max validation
   if (min !== undefined && numAmount < min) {
