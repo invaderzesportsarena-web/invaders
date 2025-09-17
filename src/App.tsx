@@ -34,6 +34,7 @@ import AdminWalletRequests from "./pages/AdminWalletRequests";
 import AdminManualAdjustment from "./pages/AdminManualAdjustment";
 import AdminShopManagement from "./pages/AdminShopManagement";
 import BackgroundRemoval from "./pages/BackgroundRemoval";
+import ContactUs from "./components/ContactUs";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +85,7 @@ const App = () => {
             {/* 404 fallback */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <ContactUs />
         </Layout>
       </BrowserRouter>
     </TooltipProvider>

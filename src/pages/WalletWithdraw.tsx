@@ -304,7 +304,7 @@ export default function WalletWithdraw() {
                   required
                 />
                 <p className="text-xs text-text-muted">
-                  Minimum: {MIN_WITHDRAWAL_ZC} ZC • Maximum: {formatZcreds(balance)} ZC
+                  Minimum: {MIN_WITHDRAWAL_ZC} ZC
                 </p>
                 {formData.amount_zcreds && (
                   <p className="text-sm text-text-secondary">
