@@ -61,13 +61,13 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-24 md:h-28 lg:h-32">
+        <div className="flex items-center justify-between h-16 md:h-18 lg:h-20">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <img 
               src="/lovable-uploads/2650bb7d-0862-44dc-9f88-90a0444a40fe.png" 
               alt="InvaderZ Esports Arena" 
-              className="h-20 md:h-24 lg:h-28"
+              className="h-12 md:h-14 lg:h-16"
             />
           </Link>
 
