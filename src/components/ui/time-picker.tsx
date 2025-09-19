@@ -16,13 +16,21 @@ export function TimePicker({ label, value, onChange, required }: TimePickerProps
   const [hour, setHour] = useState("12");
   const [minute, setMinute] = useState("00");
   const [period, setPeriod] = useState<"AM" | "PM">("AM");
-  const [isInitialized, setIsInitialized] = useState(false);
 
   // Parse initial value when component mounts or value changes
   useEffect(() => {
-    if (value && !isInitialized) {
+    if (value) {
       try {
-        const dateObj = new Date(value);
+        // Handle both datetime-local format and ISO string
+        let dateObj;
+        if (value.includes('T') && !value.endsWith('Z')) {
+          // datetime-local format (e.g., "2025-09-19T22:00")
+          dateObj = new Date(value);
+        } else {
+          // ISO string format
+          dateObj = new Date(value);
+        }
+        
         if (!isNaN(dateObj.getTime())) {
           setDate(format(dateObj, "yyyy-MM-dd"));
           
@@ -37,32 +45,30 @@ export function TimePicker({ label, value, onChange, required }: TimePickerProps
           setHour(hour24.toString());
           setMinute(minute.toString().padStart(2, "0"));
           setPeriod(period);
-          setIsInitialized(true);
         }
       } catch (error) {
         console.error("Error parsing datetime:", error);
       }
-    } else if (!value) {
+    } else {
       // Reset when value is cleared
       setDate("");
       setHour("12");
       setMinute("00");
       setPeriod("AM");
-      setIsInitialized(false);
     }
-  }, [value, isInitialized]);
+  }, [value]);
 
-  // Update parent when any component changes (but only after initialization)
-  const updateDateTime = () => {
-    if (date && hour && minute && period && isInitialized) {
+  // Handle individual field changes and update parent immediately
+  const updateDateTime = (newDate: string, newHour: string, newMinute: string, newPeriod: "AM" | "PM") => {
+    if (newDate && newHour && newMinute && newPeriod) {
       try {
         // Convert 12-hour to 24-hour
-        let hour24 = parseInt(hour);
-        if (period === "AM" && hour24 === 12) hour24 = 0;
-        else if (period === "PM" && hour24 !== 12) hour24 = hour24 + 12;
+        let hour24 = parseInt(newHour);
+        if (newPeriod === "AM" && hour24 === 12) hour24 = 0;
+        else if (newPeriod === "PM" && hour24 !== 12) hour24 = hour24 + 12;
         
         // Create datetime-local format string
-        const datetimeLocal = `${date}T${hour24.toString().padStart(2, "0")}:${minute}`;
+        const datetimeLocal = `${newDate}T${hour24.toString().padStart(2, "0")}:${newMinute}`;
         onChange(datetimeLocal);
       } catch (error) {
         console.error("Error creating datetime:", error);
@@ -70,77 +76,24 @@ export function TimePicker({ label, value, onChange, required }: TimePickerProps
     }
   };
 
-  // Handle individual field changes
   const handleDateChange = (newDate: string) => {
     setDate(newDate);
-    if (newDate && hour && minute && period) {
-      setTimeout(() => {
-        try {
-          let hour24 = parseInt(hour);
-          if (period === "AM" && hour24 === 12) hour24 = 0;
-          else if (period === "PM" && hour24 !== 12) hour24 = hour24 + 12;
-          
-          const datetimeLocal = `${newDate}T${hour24.toString().padStart(2, "0")}:${minute}`;
-          onChange(datetimeLocal);
-        } catch (error) {
-          console.error("Error updating datetime:", error);
-        }
-      }, 0);
-    }
+    updateDateTime(newDate, hour, minute, period);
   };
 
   const handleHourChange = (newHour: string) => {
     setHour(newHour);
-    if (date && newHour && minute && period) {
-      setTimeout(() => {
-        try {
-          let hour24 = parseInt(newHour);
-          if (period === "AM" && hour24 === 12) hour24 = 0;
-          else if (period === "PM" && hour24 !== 12) hour24 = hour24 + 12;
-          
-          const datetimeLocal = `${date}T${hour24.toString().padStart(2, "0")}:${minute}`;
-          onChange(datetimeLocal);
-        } catch (error) {
-          console.error("Error updating datetime:", error);
-        }
-      }, 0);
-    }
+    updateDateTime(date, newHour, minute, period);
   };
 
   const handleMinuteChange = (newMinute: string) => {
     setMinute(newMinute);
-    if (date && hour && newMinute && period) {
-      setTimeout(() => {
-        try {
-          let hour24 = parseInt(hour);
-          if (period === "AM" && hour24 === 12) hour24 = 0;
-          else if (period === "PM" && hour24 !== 12) hour24 = hour24 + 12;
-          
-          const datetimeLocal = `${date}T${hour24.toString().padStart(2, "0")}:${newMinute}`;
-          onChange(datetimeLocal);
-        } catch (error) {
-          console.error("Error updating datetime:", error);
-        }
-      }, 0);
-    }
+    updateDateTime(date, hour, newMinute, period);
   };
 
   const handlePeriodChange = (newPeriod: "AM" | "PM") => {
     setPeriod(newPeriod);
-    if (date && hour && minute && newPeriod) {
-      setTimeout(() => {
-        try {
-          let hour24 = parseInt(hour);
-          if (newPeriod === "AM" && hour24 === 12) hour24 = 0;
-          else if (newPeriod === "PM" && hour24 !== 12) hour24 = hour24 + 12;
-          
-          const datetimeLocal = `${date}T${hour24.toString().padStart(2, "0")}:${minute}`;
-          onChange(datetimeLocal);
-        } catch (error) {
-          console.error("Error updating datetime:", error);
-        }
-      }, 0);
-    }
+    updateDateTime(date, hour, minute, newPeriod);
   };
 
   const hours = Array.from({ length: 12 }, (_, i) => {
