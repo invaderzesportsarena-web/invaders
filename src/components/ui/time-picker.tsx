@@ -67,8 +67,9 @@ export function TimePicker({ label, value, onChange, required }: TimePickerProps
         if (newPeriod === "AM" && hour24 === 12) hour24 = 0;
         else if (newPeriod === "PM" && hour24 !== 12) hour24 = hour24 + 12;
         
-        // Create datetime-local format string
+        // Create datetime-local format string in Karachi timezone
         const datetimeLocal = `${newDate}T${hour24.toString().padStart(2, "0")}:${newMinute}`;
+        console.log("TimePicker updateDateTime:", { newDate, newHour, newMinute, newPeriod, hour24, datetimeLocal });
         onChange(datetimeLocal);
       } catch (error) {
         console.error("Error creating datetime:", error);
