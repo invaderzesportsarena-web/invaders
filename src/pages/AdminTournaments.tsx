@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { formatInTimeZone } from "date-fns-tz";
 import { validateZcredInput, parseZcreds, formatZcreds } from "@/utils/formatZcreds";
+import { TimePicker } from "@/components/ui/time-picker";
 
 interface Tournament {
   id: string;
@@ -390,36 +391,24 @@ export default function AdminTournaments() {
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="reg_starts_at">Registration Starts At (Karachi Time)</Label>
-                      <Input
-                        id="reg_starts_at"
-                        type="datetime-local"
-                        value={formData.reg_starts_at}
-                        onChange={(e) => setFormData({ ...formData, reg_starts_at: e.target.value })}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="reg_closes_at">Registration Closes At (Karachi Time)</Label>
-                      <Input
-                        id="reg_closes_at"
-                        type="datetime-local"
-                        value={formData.reg_closes_at}
-                        onChange={(e) => setFormData({ ...formData, reg_closes_at: e.target.value })}
-                      />
-                    </div>
+                    <TimePicker
+                      label="Registration Starts At"
+                      value={formData.reg_starts_at}
+                      onChange={(value) => setFormData({ ...formData, reg_starts_at: value })}
+                    />
+                    <TimePicker
+                      label="Registration Closes At"
+                      value={formData.reg_closes_at}
+                      onChange={(value) => setFormData({ ...formData, reg_closes_at: value })}
+                    />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="starts_at">Tournament Starts At (Karachi Time)</Label>
-                      <Input
-                        id="starts_at"
-                        type="datetime-local"
-                        value={formData.starts_at}
-                        onChange={(e) => setFormData({ ...formData, starts_at: e.target.value })}
-                      />
-                    </div>
+                    <TimePicker
+                      label="Tournament Starts At"
+                      value={formData.starts_at}
+                      onChange={(value) => setFormData({ ...formData, starts_at: value })}
+                    />
                   <div>
                     <Label htmlFor="slots">Total Slots</Label>
                     <Input
