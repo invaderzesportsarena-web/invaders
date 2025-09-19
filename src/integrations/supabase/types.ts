@@ -851,6 +851,10 @@ export type Database = {
         Args: { p_delta: number; p_reason?: string; p_user_id: string }
         Returns: undefined
       }
+      check_admin_role: {
+        Args: { user_id?: string }
+        Returns: boolean
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
