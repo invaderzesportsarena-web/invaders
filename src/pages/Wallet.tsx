@@ -283,11 +283,11 @@ export default function Wallet() {
                         <p className="text-sm text-text-secondary">
                           {formatDate(transaction.created_at)}
                         </p>
-                        {transaction.reason && (
-                          <p className="text-xs text-text-muted bg-secondary/20 rounded px-2 py-1 mt-1">
-                            <span className="font-medium">Admin note:</span> {transaction.reason}
-                          </p>
-                        )}
+                         {transaction.reason && transaction.reason.trim() && (
+                           <div className="text-xs text-text-muted bg-secondary/20 rounded px-2 py-1 mt-1 border border-border/30">
+                             <span className="font-medium text-text-primary">Admin note:</span> {transaction.reason}
+                           </div>
+                         )}
                       </div>
                     </div>
                     <div className="text-right">
