@@ -14,11 +14,34 @@ interface Transaction {
   type: string;
   status: string;
   created_at: string;
+  reason?: string;
+  reference?: string;
+}
+
+interface WithdrawalRequest {
+  id: string;
+  amount_zcreds: number;
+  status: string;
+  created_at: string;
+  rejection_reason?: string;
+  reviewed_at?: string;
+}
+
+interface DepositRequest {
+  id: string;
+  amount_zc?: number;
+  amount_money: number;
+  status: string;
+  created_at: string;
+  rejection_reason?: string;
+  reviewed_at?: string;
 }
 export default function Wallet() {
   const [user, setUser] = useState<any>(null);
   const [balance, setBalance] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [withdrawalRequests, setWithdrawalRequests] = useState<WithdrawalRequest[]>([]);
+  const [depositRequests, setDepositRequests] = useState<DepositRequest[]>([]);
   const [conversionRate, setConversionRate] = useState<number>(90);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -44,7 +67,12 @@ export default function Wallet() {
       return;
     }
     setUser(session.user);
-    await Promise.all([fetchBalance(session.user.id), fetchTransactions(session.user.id)]);
+    await Promise.all([
+      fetchBalance(session.user.id), 
+      fetchTransactions(session.user.id),
+      fetchWithdrawalRequests(session.user.id),
+      fetchDepositRequests(session.user.id)
+    ]);
     setLoading(false);
   };
   const fetchBalance = async (userId: string) => {
@@ -77,6 +105,40 @@ export default function Wallet() {
       setTransactions(data || []);
     } catch (error: any) {
       console.error('Error fetching transactions:', error.message);
+    }
+  };
+
+  const fetchWithdrawalRequests = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('zcred_withdrawal_forms')
+        .select('id, amount_zcreds, status, created_at, rejection_reason, reviewed_at')
+        .eq('user_id', userId)
+        .in('status', ['rejected', 'submitted'])
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      setWithdrawalRequests(data || []);
+    } catch (error: any) {
+      console.error('Error fetching withdrawal requests:', error.message);
+    }
+  };
+
+  const fetchDepositRequests = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('zcred_deposit_forms')
+        .select('id, amount_zc, amount_money, status, created_at, rejection_reason, reviewed_at')
+        .eq('user_id', userId)
+        .in('status', ['rejected', 'submitted'])
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      setDepositRequests(data || []);
+    } catch (error: any) {
+      console.error('Error fetching deposit requests:', error.message);
     }
   };
   const getTransactionIcon = (type: string, amount: number) => {
@@ -221,6 +283,11 @@ export default function Wallet() {
                         <p className="text-sm text-text-secondary">
                           {formatDate(transaction.created_at)}
                         </p>
+                        {transaction.reason && (
+                          <p className="text-xs text-text-muted bg-secondary/20 rounded px-2 py-1 mt-1">
+                            <span className="font-medium">Admin note:</span> {transaction.reason}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="text-right">
@@ -236,6 +303,124 @@ export default function Wallet() {
             </div>}
         </CardContent>
         </Card>
+
+        {/* Withdrawal Requests */}
+        {withdrawalRequests.length > 0 && (
+          <Card className="esports-card">
+            <CardHeader>
+              <CardTitle className="text-text-primary">Withdrawal Requests</CardTitle>
+              <CardDescription className="text-text-secondary">
+                Your pending and rejected withdrawal requests
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {withdrawalRequests.map(request => (
+                  <div key={request.id} className="flex items-center justify-between p-4 rounded-2xl border border-border">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                        request.status === 'rejected' ? 'bg-danger/10' : 'bg-warning/10'
+                      }`}>
+                        <Minus className={`w-5 h-5 ${
+                          request.status === 'rejected' ? 'text-danger' : 'text-warning'
+                        }`} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-text-primary">Withdrawal Request</p>
+                        <p className="text-sm text-text-secondary">
+                          {formatDate(request.created_at)}
+                        </p>
+                        {request.status === 'rejected' && request.rejection_reason && (
+                          <div className="mt-2 p-3 bg-danger/10 border border-danger/20 rounded-lg">
+                            <p className="text-sm font-medium text-danger mb-1">Rejection Reason:</p>
+                            <p className="text-sm text-danger">{request.rejection_reason}</p>
+                            {request.reviewed_at && (
+                              <p className="text-xs text-danger/70 mt-1">
+                                Reviewed: {formatDate(request.reviewed_at)}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-danger">
+                        -{formatZcreds(request.amount_zcreds)} ZC
+                      </p>
+                      <Badge 
+                        variant="secondary" 
+                        className={`text-xs ${
+                          request.status === 'rejected' ? 'bg-danger/10 text-danger' : 'bg-warning/10 text-warning'
+                        }`}
+                      >
+                        {request.status}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Deposit Requests */}
+        {depositRequests.length > 0 && (
+          <Card className="esports-card">
+            <CardHeader>
+              <CardTitle className="text-text-primary">Deposit Requests</CardTitle>
+              <CardDescription className="text-text-secondary">
+                Your pending and rejected deposit requests
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {depositRequests.map(request => (
+                  <div key={request.id} className="flex items-center justify-between p-4 rounded-2xl border border-border">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                        request.status === 'rejected' ? 'bg-danger/10' : 'bg-warning/10'
+                      }`}>
+                        <Plus className={`w-5 h-5 ${
+                          request.status === 'rejected' ? 'text-danger' : 'text-warning'
+                        }`} />
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-text-primary">Deposit Request</p>
+                        <p className="text-sm text-text-secondary">
+                          {formatDate(request.created_at)}
+                        </p>
+                        {request.status === 'rejected' && request.rejection_reason && (
+                          <div className="mt-2 p-3 bg-danger/10 border border-danger/20 rounded-lg">
+                            <p className="text-sm font-medium text-danger mb-1">Rejection Reason:</p>
+                            <p className="text-sm text-danger">{request.rejection_reason}</p>
+                            {request.reviewed_at && (
+                              <p className="text-xs text-danger/70 mt-1">
+                                Reviewed: {formatDate(request.reviewed_at)}
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-warning">
+                        +{formatZcreds(request.amount_zc || 0)} ZC
+                      </p>
+                      <Badge 
+                        variant="secondary" 
+                        className={`text-xs ${
+                          request.status === 'rejected' ? 'bg-danger/10 text-danger' : 'bg-warning/10 text-warning'
+                        }`}
+                      >
+                        {request.status}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>;
 }
