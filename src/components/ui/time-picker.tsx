@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { format } from "date-fns";
 
 interface TimePickerProps {
   label: string;
@@ -12,150 +10,74 @@ interface TimePickerProps {
 }
 
 export function TimePicker({ label, value, onChange, required }: TimePickerProps) {
-  const [date, setDate] = useState("");
-  const [hour, setHour] = useState("12");
-  const [minute, setMinute] = useState("00");
-  const [period, setPeriod] = useState<"AM" | "PM">("AM");
+  const [localValue, setLocalValue] = useState("");
 
-  // Parse initial value when component mounts or value changes
+  // Convert value to local datetime format when it changes
   useEffect(() => {
     if (value) {
       try {
-        // Handle both datetime-local format and ISO string
-        let dateObj;
-        if (value.includes('T') && !value.endsWith('Z')) {
-          // datetime-local format (e.g., "2025-09-19T22:00")
-          dateObj = new Date(value);
-        } else {
-          // ISO string format
-          dateObj = new Date(value);
-        }
+        // Parse the incoming value as a date
+        const date = new Date(value);
         
-        if (!isNaN(dateObj.getTime())) {
-          setDate(format(dateObj, "yyyy-MM-dd"));
+        // Check if the date is valid
+        if (!isNaN(date.getTime())) {
+          // Convert to local datetime-local format
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          const hours = String(date.getHours()).padStart(2, '0');
+          const minutes = String(date.getMinutes()).padStart(2, '0');
           
-          let hour24 = dateObj.getHours();
-          const minute = dateObj.getMinutes();
-          const period = hour24 >= 12 ? "PM" : "AM";
-          
-          // Convert 24-hour to 12-hour
-          if (hour24 === 0) hour24 = 12;
-          else if (hour24 > 12) hour24 = hour24 - 12;
-          
-          setHour(hour24.toString());
-          setMinute(minute.toString().padStart(2, "0"));
-          setPeriod(period);
+          const localDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+          setLocalValue(localDateTime);
+          console.log("TimePicker initialized:", { value, localDateTime, parsedDate: date.toISOString() });
+        } else {
+          setLocalValue("");
         }
       } catch (error) {
         console.error("Error parsing datetime:", error);
+        setLocalValue("");
       }
     } else {
-      // Reset when value is cleared
-      setDate("");
-      setHour("12");
-      setMinute("00");
-      setPeriod("AM");
+      setLocalValue("");
     }
   }, [value]);
 
-  // Handle individual field changes and update parent immediately
-  const updateDateTime = (newDate: string, newHour: string, newMinute: string, newPeriod: "AM" | "PM") => {
-    if (newDate && newHour && newMinute && newPeriod) {
+  const handleChange = (newValue: string) => {
+    setLocalValue(newValue);
+    
+    if (newValue) {
       try {
-        // Convert 12-hour to 24-hour
-        let hour24 = parseInt(newHour);
-        if (newPeriod === "AM" && hour24 === 12) hour24 = 0;
-        else if (newPeriod === "PM" && hour24 !== 12) hour24 = hour24 + 12;
+        // Create a date object from the datetime-local input
+        const date = new Date(newValue);
         
-        // Create datetime-local format string in Karachi timezone
-        const datetimeLocal = `${newDate}T${hour24.toString().padStart(2, "0")}:${newMinute}`;
-        console.log("TimePicker updateDateTime:", { newDate, newHour, newMinute, newPeriod, hour24, datetimeLocal });
-        onChange(datetimeLocal);
+        if (!isNaN(date.getTime())) {
+          // Convert to ISO string for storage
+          const isoString = date.toISOString();
+          console.log("TimePicker onChange:", { newValue, isoString, date: date.toString() });
+          onChange(isoString);
+        }
       } catch (error) {
         console.error("Error creating datetime:", error);
       }
+    } else {
+      onChange("");
     }
   };
-
-  const handleDateChange = (newDate: string) => {
-    setDate(newDate);
-    updateDateTime(newDate, hour, minute, period);
-  };
-
-  const handleHourChange = (newHour: string) => {
-    setHour(newHour);
-    updateDateTime(date, newHour, minute, period);
-  };
-
-  const handleMinuteChange = (newMinute: string) => {
-    setMinute(newMinute);
-    updateDateTime(date, hour, newMinute, period);
-  };
-
-  const handlePeriodChange = (newPeriod: "AM" | "PM") => {
-    setPeriod(newPeriod);
-    updateDateTime(date, hour, minute, newPeriod);
-  };
-
-  const hours = Array.from({ length: 12 }, (_, i) => {
-    const hourNum = i + 1;
-    return hourNum.toString();
-  });
-
-  const minutes = Array.from({ length: 12 }, (_, i) => 
-    (i * 5).toString().padStart(2, "0")
-  );
 
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
       <div className="space-y-2">
         <Input
-          type="date"
-          value={date}
-          onChange={(e) => handleDateChange(e.target.value)}
+          type="datetime-local"
+          value={localValue}
+          onChange={(e) => handleChange(e.target.value)}
           required={required}
+          className="w-full"
         />
-        <div className="grid grid-cols-4 gap-2">
-          <Select value={hour} onValueChange={handleHourChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Hour" />
-            </SelectTrigger>
-            <SelectContent>
-              {hours.map((h) => (
-                <SelectItem key={h} value={h}>
-                  {h}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <Select value={minute} onValueChange={handleMinuteChange}>
-            <SelectTrigger>
-              <SelectValue placeholder="Min" />
-            </SelectTrigger>
-            <SelectContent>
-              {minutes.map((m) => (
-                <SelectItem key={m} value={m}>
-                  {m}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <Select value={period} onValueChange={handlePeriodChange}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="AM">AM</SelectItem>
-              <SelectItem value="PM">PM</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <div className="text-xs text-muted-foreground flex items-center justify-center">
-            Karachi Time
-          </div>
+        <div className="text-xs text-muted-foreground">
+          Enter date and time in your local timezone
         </div>
       </div>
     </div>
