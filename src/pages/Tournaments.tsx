@@ -256,8 +256,12 @@ export default function Tournaments() {
   };
 
   const filterPlayed = () => {
-    return tournaments.filter(t => t.state === 'completed')
-      .sort((a, b) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime());
+    if (!user) return [];
+    const userRegisteredTournamentIds = registrations.map(r => r.tournament_id);
+    return tournaments.filter(t => 
+      t.state === 'completed' && 
+      userRegisteredTournamentIds.includes(t.id)
+    ).sort((a, b) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime());
   };
 
   const hasUserRegistered = (tournamentId: string) => {
@@ -483,20 +487,26 @@ export default function Tournaments() {
         </TabsContent>
 
         <TabsContent value="played" className="mt-6">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filterPlayed().map((tournament) => (
-              <TournamentCard 
-                key={tournament.id} 
-                tournament={tournament} 
-                showResultsButton={!!user}
-              />
-            ))}
-            {filterPlayed().length === 0 && (
-              <div className="col-span-full text-center py-12 text-text-muted">
-                No completed tournaments to display.
-              </div>
-            )}
-          </div>
+          {!user ? (
+            <div className="text-center py-12 text-text-muted">
+              Please log in to view tournaments you've participated in.
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {filterPlayed().map((tournament) => (
+                <TournamentCard 
+                  key={tournament.id} 
+                  tournament={tournament} 
+                  showResultsButton={true}
+                />
+              ))}
+              {filterPlayed().length === 0 && (
+                <div className="col-span-full text-center py-12 text-text-muted">
+                  No completed tournaments you've participated in.
+                </div>
+              )}
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="registered" className="mt-6">
