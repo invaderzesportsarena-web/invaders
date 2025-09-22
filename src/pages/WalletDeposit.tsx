@@ -229,7 +229,7 @@ export default function WalletDeposit() {
           <CardDescription className="text-text-secondary">
             SEND YOUR AMOUNT ON AC MENTION BELOW AND WATCH THE YOUTUBE VIDEO FIRST TO DO IT IN CORRECT WAY
             <br /><br />
-            Send your amount to the number below. Minimum deposit: {MIN_DEPOSIT_PKR} PKR (2 Z-Credits)
+            Send your amount to the number below. Minimum deposit: {MIN_DEPOSIT_PKR} PKR ({MIN_DEPOSIT_PKR / conversionRate} Z-Credits)
             <br />Current rate: 1 Z-Credit = {conversionRate} PKR
             <br /><br />
             <BankingInfo />
