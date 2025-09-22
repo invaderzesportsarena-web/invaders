@@ -209,7 +209,7 @@ export default function Wallet() {
               </div>
               <div>
                 <CardTitle className="text-text-primary text-xl">Current Balance</CardTitle>
-                <CardDescription className="text-text-secondary">Available Z-Credits • Min deposit: 200 ZC • Min withdrawal: 150 ZC</CardDescription>
+                <CardDescription className="text-text-secondary">Available Z-Credits • Min deposit: 120 ZC • Min withdrawal: 150 ZC</CardDescription>
               </div>
             </div>
             <div className="text-right">
