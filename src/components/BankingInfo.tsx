@@ -35,8 +35,8 @@ export default function BankingInfo({ className = "" }: BankingInfoProps) {
         // Fall back to hardcoded values if database access fails
         setBankingDetails({
           id: 1,
-          account_number: '03282673854',
-          account_title: 'MUHAMMAD SAQIB',
+          account_number: '03492169543',
+          account_title: 'Sultan',
           bank_name: 'EASY PAISA',
           instructions: null,
           is_active: true
@@ -49,8 +49,8 @@ export default function BankingInfo({ className = "" }: BankingInfoProps) {
       // Fall back to hardcoded values
       setBankingDetails({
         id: 1,
-        account_number: '03282673854',
-        account_title: 'MUHAMMAD SAQIB',
+        account_number: '03492169543',
+        account_title: 'Sultan',
         bank_name: 'EASY PAISA',
         instructions: null,
         is_active: true
