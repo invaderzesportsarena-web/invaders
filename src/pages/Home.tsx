@@ -194,7 +194,7 @@ export default function Home() {
               </Button>
               <Button variant="ghost" size="lg" className="text-lg px-8 py-4 h-auto font-bold" asChild>
                 <Link to="/tournaments">
-                  Learn More
+                  View Tournaments
                 </Link>
               </Button>
             </div>
