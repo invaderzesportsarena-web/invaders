@@ -34,6 +34,7 @@ import AdminWalletRequests from "./pages/AdminWalletRequests";
 import AdminManualAdjustment from "./pages/AdminManualAdjustment";
 import AdminShopManagement from "./pages/AdminShopManagement";
 import BackgroundRemoval from "./pages/BackgroundRemoval";
+import AdminPasswordReset from "./pages/AdminPasswordReset";
 import ContactUs from "./components/ContactUs";
 
 const queryClient = new QueryClient();
@@ -79,8 +80,9 @@ const App = () => {
           <Route path="/admin/products" element={<AdminProducts />} />
           <Route path="/admin/shop-management" element={<AdminShopManagement />} />
           <Route path="/admin/results" element={<AdminResults />} />
-          <Route path="/admin/settings" element={<AdminSettings />} />
-          <Route path="/admin/users" element={<AdminUserManagement />} />
+           <Route path="/admin/settings" element={<AdminSettings />} />
+           <Route path="/admin/users" element={<AdminUserManagement />} />
+           <Route path="/admin/password-reset" element={<AdminPasswordReset />} />
             
             {/* 404 fallback */}
             <Route path="*" element={<NotFound />} />
